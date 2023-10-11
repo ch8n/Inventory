@@ -29,6 +29,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,9 +46,13 @@ import ch8n.dev.inventory.data.usecase.DeleteInventoryCategory
 import ch8n.dev.inventory.data.usecase.DeleteInventoryItem
 import ch8n.dev.inventory.data.usecase.UpdateInventoryCategory
 import ch8n.dev.inventory.data.usecase.UpdateInventoryItem
+import ch8n.dev.inventory.ui.LocalNavigator
 import ch8n.dev.inventory.ui.WithAppStore
+import ch8n.dev.inventory.ui.WithNavigator
 import ch8n.dev.inventory.ui.screens.AttributeHeader
 import ch8n.dev.inventory.ui.screens.CategoryScreen
+import ch8n.dev.inventory.ui.screens.HomeScreen
+import ch8n.dev.inventory.ui.screens.ItemScreen
 import ch8n.dev.inventory.ui.theme.InventoryTheme
 
 class MainActivity : ComponentActivity() {
@@ -57,8 +62,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             InventoryTheme {
-                WithAppStore {
-                    CategoryScreen()
+                WithNavigator {
+                    WithAppStore {
+                        val navigator = LocalNavigator.current
+                        val currentDestination by navigator
+                            .currentDestination
+                            .collectAsState(
+                                initial = Destinations.HomeScreen
+                            )
+                        when (currentDestination) {
+                            Destinations.CategoryScreen -> CategoryScreen()
+                            Destinations.HomeScreen, null -> HomeScreen()
+                            Destinations.ItemScreen -> ItemScreen()
+                        }
+                    }
                 }
             }
         }
@@ -67,3 +84,8 @@ class MainActivity : ComponentActivity() {
 
 }
 
+sealed class Destinations {
+    object HomeScreen : Destinations()
+    object CategoryScreen : Destinations()
+    object ItemScreen : Destinations()
+}
