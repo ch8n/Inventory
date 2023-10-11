@@ -1,56 +1,77 @@
 package ch8n.dev.inventory.data.domain
 
-enum class CategoryAttributeTypes {
-    Image,
-    Numeric,
-    DropDown,
-    Text
-}
+import java.util.UUID
 
-sealed class CategoryAttribute {
-
-    object None : CategoryAttribute()
-
-    data class Image(
-        val key: String = "",
-        val selectedValues: List<String> = emptyList()
-    ) : CategoryAttribute()
-
-    data class Numeric(
-        val key: String = "",
-        val selectedValue: Int = 0,
-    ) : CategoryAttribute()
-
-    data class DropDown(
-        val key: String = "",
-        val optionValues: List<String> = emptyList(),
-        val selectedValue: String = "",
-    ) : CategoryAttribute()
-
-    data class Text(
-        val key: String = "",
-        val value: String = "",
-    ) : CategoryAttribute()
-}
-
-
-data class InventoryCategory(
-    val categoryId: String,
+data class InventoryItem(
+    val id: String,
     val name: String,
-    val attributes: List<CategoryAttribute>,
+    val images: List<String>,
+    val category: InventoryCategory,
+    val itemVariant: List<InventoryItemVariant>,
+    val totalQuantity: Int,
+    val weight: Double,
+    val supplier: InventorySupplier,
+    val sellingPrice: Int,
+    val purchasePrice: Int
 ) {
     companion object {
-        val NO_CATEGORY = InventoryCategory(
-            categoryId = "",
+        val Empty = InventoryItem(
+            id = "",
             name = "",
-            attributes = listOf()
+            images = listOf(),
+            category = InventoryCategory.Empty,
+            itemVariant = emptyList(),
+            supplier = InventorySupplier.Empty,
+            sellingPrice = 0,
+            purchasePrice = 0,
+            totalQuantity = 0,
+            weight = 0.0,
         )
     }
 }
 
-data class InventoryItem(
-    val itemId: String,
+data class InventoryCategory(
+    val id: String = UUID.randomUUID().toString(),
     val name: String,
-    val categoryId: String,
-    val attributeValues: List<CategoryAttribute>,
-)
+    val sizes: List<String>
+) {
+    companion object {
+        val Empty = InventoryCategory(
+            id = "",
+            name = "",
+            sizes = emptyList()
+        )
+    }
+}
+
+data class InventorySupplier(
+    val id: String = UUID.randomUUID().toString(),
+    val name: String
+) {
+    companion object {
+        val Empty = InventorySupplier(
+            id = "",
+            name = ""
+        )
+    }
+}
+
+data class InventoryItemVariant(
+    val id: String = UUID.randomUUID().toString(),
+    val color: String,
+    val quantity: Int,
+) {
+    companion object {
+        val New
+            get() = InventoryItemVariant(
+                color = "",
+                quantity = 0
+            )
+
+        val Empty = InventoryItemVariant(
+            id = "",
+            color = "",
+            quantity = 0
+        )
+    }
+}

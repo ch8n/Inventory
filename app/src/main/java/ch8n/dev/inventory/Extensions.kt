@@ -2,12 +2,29 @@ package ch8n.dev.inventory
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+
+@Composable
+inline fun <T> rememberMutableState(init: T): MutableState<T> {
+    return remember { mutableStateOf(init) }
+}
+
+@Composable
+inline fun <T> rememberDerivedStateOf(noinline calculation: () -> T): State<T> {
+    return remember { derivedStateOf(calculation = calculation) }
+}
+
 
 @Stable
 @JvmInline
