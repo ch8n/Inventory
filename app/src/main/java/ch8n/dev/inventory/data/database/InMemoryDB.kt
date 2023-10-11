@@ -25,12 +25,27 @@ object InMemoryDB {
             )
         )
     )
+    private val inventorySupplier = MutableStateFlow<List<InventorySupplier>>(
+        listOf(
+            InventorySupplier(
+                name = "lovely"
+            ),
+            InventorySupplier(
+                name = "Tubly"
+            ),
+        )
+    )
     private val inventoryItems = MutableStateFlow<List<InventoryItem>>(emptyList())
-    private val inventorySupplier = MutableStateFlow<List<InventorySupplier>>(emptyList())
 
     val inventoryCategoriesFlow = inventoryCategories.asStateFlow()
     val inventoryItemsFlow = inventoryItems.asStateFlow()
     val inventorySupplierFlow = inventorySupplier.asStateFlow()
+
+    fun addSuppliers(suppliers: List<InventorySupplier>) {
+        inventorySupplier.update { current ->
+            (current + suppliers).distinctBy { it.name }
+        }
+    }
 
     fun addInventoryCategory(category: InventoryCategory) {
         val current = inventoryCategories.value

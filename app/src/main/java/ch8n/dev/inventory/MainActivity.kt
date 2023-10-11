@@ -12,6 +12,7 @@ import ch8n.dev.inventory.ui.WithNavigator
 import ch8n.dev.inventory.ui.screens.CreateCategoryScreen
 import ch8n.dev.inventory.ui.screens.HomeScreen
 import ch8n.dev.inventory.ui.screens.CreateItemScreen
+import ch8n.dev.inventory.ui.screens.CreateSupplierScreen
 import ch8n.dev.inventory.ui.screens.OrderScreen
 import ch8n.dev.inventory.ui.theme.InventoryTheme
 
@@ -35,6 +36,7 @@ class MainActivity : ComponentActivity() {
                             Destinations.HomeScreen, null -> HomeScreen()
                             Destinations.CreateItemScreen -> CreateItemScreen()
                             Destinations.OrderScreen -> OrderScreen()
+                            Destinations.CreateSupplierScreen -> CreateSupplierScreen()
                         }
                     }
                 }
@@ -48,6 +50,7 @@ class MainActivity : ComponentActivity() {
 sealed class Destinations {
     object HomeScreen : Destinations()
     object CreateCategoryScreen : Destinations()
+    object CreateSupplierScreen : Destinations()
     object CreateItemScreen : Destinations()
     object OrderScreen : Destinations()
 }

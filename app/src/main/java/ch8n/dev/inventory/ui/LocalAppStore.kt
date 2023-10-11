@@ -6,6 +6,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import ch8n.dev.inventory.data.usecase.CreateInventoryCategory
 import ch8n.dev.inventory.data.usecase.CreateInventoryItem
+import ch8n.dev.inventory.data.usecase.CreateInventorySuppliers
 import ch8n.dev.inventory.data.usecase.DeleteInventoryCategory
 import ch8n.dev.inventory.data.usecase.DeleteInventoryItem
 import ch8n.dev.inventory.data.usecase.GetInventoryCategory
@@ -30,6 +31,7 @@ class AppStore(
     val getSupplier: GetInventorySupplier = GetInventorySupplier(),
     val getItems: GetInventoryItem = GetInventoryItem(),
     val createCategory: CreateInventoryCategory = CreateInventoryCategory(),
+    val createSuppliers: CreateInventorySuppliers = CreateInventorySuppliers(),
     val updateCategory: UpdateInventoryCategory = UpdateInventoryCategory(),
     val deleteCategory: DeleteInventoryCategory = DeleteInventoryCategory(),
     val createItem: CreateInventoryItem = CreateInventoryItem(),

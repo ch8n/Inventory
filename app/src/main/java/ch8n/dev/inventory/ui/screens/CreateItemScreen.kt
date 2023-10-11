@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -52,18 +53,20 @@ import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
 import ch8n.dev.inventory.ui.LocalAppStore
+import ch8n.dev.inventory.ui.LocalNavigator
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateItemScreen() {
 
+    val navigator = LocalNavigator.current
     val store = LocalAppStore.current
     var itemName by rememberMutableState(init = "")
     var itemImages by rememberMutableState(init = ComposeStable(listOf<String>()))
     var selectedCategory by rememberMutableState(init = InventoryCategory.Empty)
     var selectedSupplier by rememberMutableState(init = InventorySupplier.Empty)
-    var itemVariants = remember { mutableStateListOf<InventoryItemVariant>() }
+    var itemVariants by rememberMutableState(init = ComposeStable(listOf<InventoryItemVariant>()))
     var totalQuantity by rememberMutableState(init = 0)
     var itemWeight by rememberMutableState(init = "")
     var purchasePrice by rememberMutableState(init = "")
@@ -119,48 +122,38 @@ fun CreateItemScreen() {
                     categories.value.map { it.name }.toList().let { ComposeStable(it) }
                 }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(2.sdp, Color.DarkGray)
-                        .padding(8.sdp)
-                ) {
+                OptionDropDown(
+                    title = "Select Category",
+                    dropdownOptions = dropdownOptions,
+                    onSelected = { index ->
+                        selectedCategory = categories.value.get(index)
+                    }
+                )
 
-                    OptionDropDown(
-                        title = "Select Category",
-                        dropdownOptions = dropdownOptions,
-                        onSelected = { index ->
-                            selectedCategory = categories.value.get(index)
+                AnimatedVisibility(visible = selectedCategory != InventoryCategory.Empty) {
+                    OutlinedTextField(
+                        value = selectedCategory.name,
+                        onValueChange = {},
+                        label = { Text(text = "Option Selected") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.sdp),
+                        readOnly = true,
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = Color.DarkGray
+                        ),
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                selectedCategory = InventoryCategory.Empty
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = null
+                                )
+                            }
                         }
                     )
-
-                    AnimatedVisibility(visible = selectedCategory != InventoryCategory.Empty) {
-                        OutlinedTextField(
-                            value = selectedCategory.name,
-                            onValueChange = {},
-                            label = { Text(text = "Option Selected") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.sdp),
-                            readOnly = true,
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                textColor = Color.DarkGray
-                            ),
-                            trailingIcon = {
-                                IconButton(onClick = {
-                                    selectedCategory = InventoryCategory.Empty
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Delete,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        )
-                    }
                 }
-
-
             }
 
             item {
@@ -171,44 +164,37 @@ fun CreateItemScreen() {
                     supplier.value.map { it.name }.toList().let { ComposeStable(it) }
                 }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(2.sdp, Color.DarkGray)
-                        .padding(8.sdp)
-                ) {
-                    OptionDropDown(
-                        title = "Select Supplier",
-                        dropdownOptions = dropdownOptions,
-                        onSelected = { index ->
-                            selectedSupplier = supplier.value.get(index)
-                        }
-                    )
-
-                    AnimatedVisibility(visible = selectedSupplier != InventorySupplier.Empty) {
-                        OutlinedTextField(
-                            value = selectedSupplier.name,
-                            onValueChange = {},
-                            label = { Text(text = "Option Selected") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.sdp),
-                            readOnly = true,
-                            trailingIcon = {
-                                IconButton(onClick = {
-                                    selectedSupplier = InventorySupplier.Empty
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Delete,
-                                        contentDescription = null
-                                    )
-                                }
-                            },
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                textColor = Color.DarkGray
-                            )
-                        )
+                OptionDropDown(
+                    title = "Select Supplier",
+                    dropdownOptions = dropdownOptions,
+                    onSelected = { index ->
+                        selectedSupplier = supplier.value.get(index)
                     }
+                )
+
+                AnimatedVisibility(visible = selectedSupplier != InventorySupplier.Empty) {
+                    OutlinedTextField(
+                        value = selectedSupplier.name,
+                        onValueChange = {},
+                        label = { Text(text = "Option Selected") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.sdp),
+                        readOnly = true,
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                selectedSupplier = InventorySupplier.Empty
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = null
+                                )
+                            }
+                        },
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = Color.DarkGray
+                        )
+                    )
                 }
             }
 
@@ -229,95 +215,92 @@ fun CreateItemScreen() {
             }
 
             item {
-                Column(
+                OutlinedButton(
+                    onClick = {
+                        val current = itemVariants.value.toMutableList()
+                        current.add(InventoryItemVariant.New)
+                        itemVariants = ComposeStable(current)
+                    }
+                ) {
+                    Text(text = "+ Add Item Variant")
+                }
+            }
+
+            itemsIndexed(itemVariants.value) { index, variant ->
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(2.sdp, Color.DarkGray)
-                        .padding(8.sdp),
+                        .padding(vertical = 8.sdp)
                 ) {
 
-                    OutlinedButton(
-                        onClick = {
-                            itemVariants.add(InventoryItemVariant.New)
-                        }
-                    ) {
-                        Text(text = "+ Add Item Variant")
+                    var color by rememberMutableState(init = variant.color)
+                    var quanitity by remember { mutableStateOf(variant.quantity) }
+
+                    LaunchedEffect(color, quanitity) {
+                        val current = itemVariants.value.toMutableList()
+                        current.set(
+                            index,
+                            variant.copy(color = color, quantity = quanitity)
+                        )
+                        itemVariants = ComposeStable(current)
                     }
 
-                    itemVariants.forEachIndexed { index, variant ->
+                    OutlinedTextField(
+                        value = color,
+                        onValueChange = { color = it },
+                        label = { Text(text = "Color") },
+                        modifier = Modifier.fillMaxWidth(0.5f),
+                        maxLines = 1,
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = Color.DarkGray
+                        )
+                    )
 
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.sdp)
-                        ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
 
-                            var color by rememberMutableState(init = "")
-                            var quanitity by remember { mutableStateOf(0) }
-
-                            LaunchedEffect(color, quanitity) {
-                                itemVariants.set(
-                                    index,
-                                    variant.copy(color = color, quantity = quanitity)
-                                )
-                            }
-
-                            OutlinedTextField(
-                                value = color,
-                                onValueChange = { color = it },
-                                label = { Text(text = "Color") },
-                                modifier = Modifier.fillMaxWidth(0.5f),
-                                maxLines = 1,
-                                colors = TextFieldDefaults.outlinedTextFieldColors(
-                                    textColor = Color.DarkGray
-                                )
-                            )
-
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceAround,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-
-                                IconButton(onClick = { quanitity += 1 }) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.KeyboardArrowUp,
-                                        contentDescription = null
-                                    )
-                                }
-
-                                Text(
-                                    text = quanitity.toString(),
-                                    color = Color.DarkGray,
-                                    fontSize = 14.ssp
-                                )
-
-                                IconButton(onClick = { quanitity -= 1 }) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.KeyboardArrowDown,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        }
-
-                        IconButton(onClick = {
-                            itemVariants.removeAt(index)
-                        }) {
+                        IconButton(onClick = { quanitity += 1 }) {
                             Icon(
-                                imageVector = Icons.Outlined.Delete,
+                                imageVector = Icons.Rounded.KeyboardArrowUp,
                                 contentDescription = null
                             )
                         }
 
+                        Text(
+                            text = quanitity.toString(),
+                            color = Color.DarkGray,
+                            fontSize = 14.ssp
+                        )
+
+                        IconButton(onClick = { quanitity -= 1 }) {
+                            Icon(
+                                imageVector = Icons.Rounded.KeyboardArrowDown,
+                                contentDescription = null
+                            )
+                        }
+                    }
+
+                    IconButton(onClick = {
+                        val current = itemVariants.value.toMutableList()
+                        current.removeAt(index)
+                        itemVariants = ComposeStable(current)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = null
+                        )
                     }
                 }
             }
 
             item {
+
                 LaunchedEffect(itemVariants) {
-                    totalQuantity = itemVariants.sumOf { it.quantity }
+                    totalQuantity = itemVariants.value.sumOf { it.quantity }
                 }
 
                 OutlinedTextField(
@@ -373,13 +356,14 @@ fun CreateItemScreen() {
                     name = itemName,
                     images = itemImages.value,
                     category = selectedCategory,
-                    itemVariant = itemVariants,
+                    itemVariant = itemVariants.value,
                     totalQuantity = totalQuantity,
                     weight = itemWeight.toDoubleOrNull() ?: 0.0,
                     supplier = selectedSupplier,
                     sellPrice = sellPrice.toIntOrNull() ?: 0,
                     purchasePrice = purchasePrice.toIntOrNull() ?: 0
                 )
+                navigator.back()
             },
             modifier = Modifier
                 .fillMaxWidth()
