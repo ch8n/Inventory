@@ -9,26 +9,28 @@ enum class CategoryAttributeTypes {
 
 sealed class CategoryAttribute {
 
+    object None : CategoryAttribute()
+
     data class Image(
         val key: String = "",
-        val value: List<String> = emptyList()
+        val selectedValues: List<String> = emptyList()
     ) : CategoryAttribute()
 
     data class Numeric(
         val key: String = "",
-        val value: Double = 0.0,
+        val selectedValue: Int = 0,
     ) : CategoryAttribute()
 
     data class DropDown(
         val key: String = "",
-        val value: List<String> = emptyList(),
+        val optionValues: List<String> = emptyList(),
+        val selectedValue: String = "",
     ) : CategoryAttribute()
 
     data class Text(
         val key: String = "",
         val value: String = "",
     ) : CategoryAttribute()
-
 }
 
 

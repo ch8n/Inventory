@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.DropdownMenu
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import ch8n.dev.inventory.data.domain.CategoryAttribute
 import ch8n.dev.inventory.data.domain.CategoryAttributeTypes
 import ch8n.dev.inventory.sdp
@@ -119,6 +121,11 @@ fun CategoryScreen() {
                             attributes.removeAt(index)
                         }
                     )
+
+                    is CategoryAttribute.None -> {
+
+                    }
+
                 }
             }
 
@@ -127,7 +134,7 @@ fun CategoryScreen() {
 
         OutlinedButton(
             onClick = {
-                store.createCategory(
+                store.createCategory.execute(
                     name = categoryName,
                     attribute = attributes
                 )
@@ -143,7 +150,11 @@ fun CategoryScreen() {
 
 
 @Composable
-fun AttributeHeader(text: String, onDeleteAttribute: () -> Unit) {
+fun AttributeHeader(
+    text: String,
+    isDeleteEnabled: Boolean = false,
+    onDeleteAttribute: () -> Unit = {},
+) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -155,12 +166,14 @@ fun AttributeHeader(text: String, onDeleteAttribute: () -> Unit) {
             fontSize = 24.ssp,
         )
 
-        IconButton(onClick = onDeleteAttribute) {
-            Icon(
-                imageVector = Icons.Outlined.Delete,
-                contentDescription = null,
-                modifier = Modifier.size(24.sdp)
-            )
+        if (isDeleteEnabled) {
+            IconButton(onClick = onDeleteAttribute) {
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.sdp)
+                )
+            }
         }
     }
 }
@@ -171,16 +184,17 @@ fun AttributeHeader(text: String, onDeleteAttribute: () -> Unit) {
 fun DropDownCategoryUI(
     attribute: CategoryAttribute.DropDown,
     onAttributeUpdate: (attribute: CategoryAttribute.DropDown) -> Unit,
-    onDeleteAttribute: () -> Unit,
+    isDeleteEnabled: Boolean = false,
+    onDeleteAttribute: () -> Unit = {},
 ) {
     var attributeName by remember { mutableStateOf(attribute.key) }
-    var attributeOptions by remember { mutableStateOf(attribute.value) }
+    var attributeOptions by remember { mutableStateOf(attribute.optionValues) }
 
     LaunchedEffect(attributeName, attributeOptions) {
         onAttributeUpdate.invoke(
             attribute.copy(
                 key = attributeName,
-                value = attributeOptions
+                optionValues = attributeOptions
             )
         )
     }
@@ -196,6 +210,7 @@ fun DropDownCategoryUI(
 
         AttributeHeader(
             text = "Drop Down Attribute",
+            isDeleteEnabled = isDeleteEnabled,
             onDeleteAttribute = onDeleteAttribute
         )
 
@@ -253,7 +268,8 @@ fun DropDownCategoryUI(
 fun ImageAttributeUI(
     attribute: CategoryAttribute.Image,
     onAttributeUpdate: (updated: CategoryAttribute.Image) -> Unit,
-    onDeleteAttribute: () -> Unit,
+    isDeleteEnabled: Boolean = false,
+    onDeleteAttribute: () -> Unit = {},
 ) {
 
     var attributeName by remember { mutableStateOf(attribute.key) }
@@ -262,7 +278,7 @@ fun ImageAttributeUI(
         onAttributeUpdate.invoke(
             attribute.copy(
                 key = attributeName,
-                value = emptyList()
+                selectedValues = emptyList()
             )
         )
     }
@@ -277,6 +293,7 @@ fun ImageAttributeUI(
     ) {
         AttributeHeader(
             text = "Image Attribute",
+            isDeleteEnabled = isDeleteEnabled,
             onDeleteAttribute = onDeleteAttribute
         )
 
@@ -296,16 +313,17 @@ fun ImageAttributeUI(
 fun NumericAttributeUI(
     attribute: CategoryAttribute.Numeric,
     onAttributeUpdate: (updated: CategoryAttribute.Numeric) -> Unit,
-    onDeleteAttribute: () -> Unit,
+    isDeleteEnabled: Boolean = false,
+    onDeleteAttribute: () -> Unit = {},
 ) {
     var attributeName by remember { mutableStateOf(attribute.key) }
-    var attributeValue by remember { mutableStateOf(attribute.value.toString()) }
+    var attributeValue by remember { mutableStateOf(attribute.selectedValue.toString()) }
 
     LaunchedEffect(attributeName, attributeValue) {
         onAttributeUpdate.invoke(
             attribute.copy(
                 key = attributeName,
-                value = attributeValue.toDoubleOrNull() ?: 0.0
+                selectedValue = 0
             )
         )
     }
@@ -320,6 +338,7 @@ fun NumericAttributeUI(
     ) {
         AttributeHeader(
             text = "Numeric Attribute",
+            isDeleteEnabled = isDeleteEnabled,
             onDeleteAttribute = onDeleteAttribute
         )
 
@@ -329,13 +348,6 @@ fun NumericAttributeUI(
                 attributeName = it
             },
             label = { Text(text = "Attribute Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = attributeValue,
-            onValueChange = { attributeValue = it },
-            label = { Text(text = "Attribute Value") },
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -348,7 +360,8 @@ fun NumericAttributeUI(
 fun TextAttributeUI(
     attribute: CategoryAttribute.Text,
     onAttributeUpdate: (updated: CategoryAttribute.Text) -> Unit,
-    onDeleteAttribute: () -> Unit,
+    isDeleteEnabled: Boolean = false,
+    onDeleteAttribute: () -> Unit = {},
 ) {
     var attributeName by remember { mutableStateOf(attribute.key) }
     var attributeValue by remember { mutableStateOf(attribute.value) }
@@ -372,6 +385,7 @@ fun TextAttributeUI(
     ) {
         AttributeHeader(
             text = "Text Attribute",
+            isDeleteEnabled = isDeleteEnabled,
             onDeleteAttribute = onDeleteAttribute
         )
 

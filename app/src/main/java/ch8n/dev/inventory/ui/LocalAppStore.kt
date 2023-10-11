@@ -9,10 +9,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import ch8n.dev.inventory.Destinations
 import ch8n.dev.inventory.data.domain.CategoryAttribute
+import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.usecase.CreateInventoryCategory
 import ch8n.dev.inventory.data.usecase.CreateInventoryItem
 import ch8n.dev.inventory.data.usecase.DeleteInventoryCategory
 import ch8n.dev.inventory.data.usecase.DeleteInventoryItem
+import ch8n.dev.inventory.data.usecase.GetInventoryCategory
 import ch8n.dev.inventory.data.usecase.UpdateInventoryCategory
 import ch8n.dev.inventory.data.usecase.UpdateInventoryItem
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,6 +81,7 @@ class Navigator {
 
 
 class AppStore(
+    val getCategory: GetInventoryCategory = GetInventoryCategory(),
     val createCategory: CreateInventoryCategory = CreateInventoryCategory(),
     val updateCategory: UpdateInventoryCategory = UpdateInventoryCategory(),
     val deleteCategory: DeleteInventoryCategory = DeleteInventoryCategory(),
@@ -87,8 +90,5 @@ class AppStore(
     val deleteItem: DeleteInventoryItem = DeleteInventoryItem(),
 ) {
 
-    fun createCategory(name: String, attribute: List<CategoryAttribute>) {
-        createCategory.execute(name, attribute)
-    }
 
 }

@@ -1,11 +1,21 @@
 package ch8n.dev.inventory.data.usecase
 
+import ch8n.dev.inventory.ComposeStable
 import ch8n.dev.inventory.data.database.InMemoryDB
 import ch8n.dev.inventory.data.domain.CategoryAttribute
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
+import kotlinx.coroutines.flow.map
 import java.util.UUID
 
+
+class GetInventoryCategory(
+    private val database: InMemoryDB = InMemoryDB,
+) {
+    val value = database.inventoryCategoriesFlow.map {
+        ComposeStable(it)
+    }
+}
 
 class CreateInventoryCategory(
     private val database: InMemoryDB = InMemoryDB,
