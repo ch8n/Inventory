@@ -82,7 +82,7 @@ fun HomeScreen() {
             item {
                 OutlinedButton(
                     onClick = {
-                        navigator.goto(Destinations.OrderScreen)
+                        navigator.goto(Destinations.CreateOrderScreen)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {

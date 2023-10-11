@@ -36,7 +36,7 @@ import ch8n.dev.inventory.ui.LocalNavigator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderScreen() {
+fun CreateOrderScreen() {
 
     val store = LocalAppStore.current
     val navigator = LocalNavigator.current
