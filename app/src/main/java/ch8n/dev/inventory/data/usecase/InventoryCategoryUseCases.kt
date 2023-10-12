@@ -1,23 +1,51 @@
 package ch8n.dev.inventory.data.usecase
 
+import ch8n.dev.inventory.ComposeStable
 import ch8n.dev.inventory.data.database.InMemoryDB
-import ch8n.dev.inventory.data.domain.CategoryAttribute
 import ch8n.dev.inventory.data.domain.InventoryCategory
-import ch8n.dev.inventory.data.domain.InventoryItem
-import java.util.UUID
+import ch8n.dev.inventory.data.domain.InventorySupplier
+import kotlinx.coroutines.flow.map
 
+
+class GetInventoryCategory(
+    private val database: InMemoryDB = InMemoryDB,
+) {
+    val value = database.inventoryCategoriesFlow.map {
+        ComposeStable(it)
+    }
+}
+
+class GetInventorySupplier(
+    private val database: InMemoryDB = InMemoryDB,
+) {
+    val value = database.inventorySupplierFlow.map {
+        ComposeStable(it)
+    }
+}
+
+class CreateInventorySuppliers(
+    private val database: InMemoryDB = InMemoryDB,
+) {
+    fun execute(
+        suppliers: List<String>
+    ) {
+        val suppliers = suppliers.map { name ->
+            InventorySupplier(name = name)
+        }
+        database.addSuppliers(suppliers)
+    }
+}
 
 class CreateInventoryCategory(
     private val database: InMemoryDB = InMemoryDB,
 ) {
     fun execute(
         name: String,
-        attribute: List<CategoryAttribute>
+        sizes: List<String>
     ) {
         val category = InventoryCategory(
             name = name,
-            attributes = attribute,
-            categoryId = UUID.randomUUID().toString(),
+            sizes = sizes
         )
         database.addInventoryCategory(category)
     }
@@ -29,11 +57,11 @@ class UpdateInventoryCategory(
     fun execute(
         current: InventoryCategory,
         name: String = current.name,
-        attributes: List<CategoryAttribute> = current.attributes,
+        sizes: List<String> = current.sizes
     ) {
         val item = current.copy(
             name = name,
-            attributes = attributes,
+            sizes = sizes,
         )
         database.editInventoryCategory(item)
     }
