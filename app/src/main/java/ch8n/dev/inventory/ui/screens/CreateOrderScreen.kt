@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -48,9 +50,9 @@ fun CreateOrderScreen() {
 
     val store = LocalAppStore.current
     val navigator = LocalNavigator.current
-    var searchQuery by remember { mutableStateOf("") }
+    val searchQuery by store.query.collectAsState("")
     var selectedCategory by rememberMutableState(init = InventoryCategory.Empty)
-    val items by store.getItems.value.collectAsState(initial = ComposeStable(emptyList()))
+    val items by store.getQueryItem.collectAsState(initial = ComposeStable(emptyList()))
 
     Box(
         modifier = Modifier
@@ -95,12 +97,24 @@ fun CreateOrderScreen() {
             item {
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                    onValueChange = {
+                        store.query.tryEmit(it)
+                    },
                     label = { Text(text = "Search Item") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         textColor = Color.DarkGray
-                    )
+                    ),
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            store.query.tryEmit("")
+                        }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Delete,
+                                contentDescription = null
+                            )
+                        }
+                    }
                 )
             }
 
@@ -147,6 +161,8 @@ fun CreateOrderScreen() {
             }
 
             itemsIndexed(items.value) { index, item ->
+
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -174,7 +190,62 @@ fun CreateOrderScreen() {
                         }
                     }
 
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(2.sdp, Color.Gray)
+                                .padding(4.sdp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = "color")
+                            Text(text = "Stock")
+                            Text(text = "Size")
+                            Text(text = "Order")
+                        }
+                        item.itemVariant.forEach { varient ->
 
+                            var quanitity by rememberMutableState(init = 0)
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .border(2.sdp, Color.Gray)
+                                    .padding(4.sdp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(text = varient.color)
+                                Text(text = "${varient.quantity}")
+                                Text(text = "${varient.size}")
+
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceAround,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+
+                                    IconButton(onClick = { quanitity += 1 }) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.KeyboardArrowUp,
+                                            contentDescription = null
+                                        )
+                                    }
+
+                                    Text(
+                                        text = quanitity.toString(),
+                                        color = Color.DarkGray,
+                                        fontSize = 14.ssp
+                                    )
+
+                                    IconButton(onClick = { quanitity -= 1 }) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.KeyboardArrowDown,
+                                            contentDescription = null
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

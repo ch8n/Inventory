@@ -2,6 +2,7 @@ package ch8n.dev.inventory.data.database
 
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
+import ch8n.dev.inventory.data.domain.InventoryItemVariant
 import ch8n.dev.inventory.data.domain.InventorySupplier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,7 +47,20 @@ object InMemoryDB {
                     name = "Tracie Howard",
                     sizes = listOf()
                 ),
-                itemVariant = listOf(),
+                itemVariant = listOf(
+                    InventoryItemVariant(
+                        id = "nonumes",
+                        color = "tempus",
+                        quantity = 4939,
+                        size = "2.2"
+                    ),
+                    InventoryItemVariant(
+                        id = "praesent",
+                        color = "vestibulum",
+                        quantity = 5842,
+                        size = "2.4"
+                    )
+                ),
                 totalQuantity = 20,
                 weight = 6.7,
                 supplier = InventorySupplier(
@@ -65,7 +79,20 @@ object InMemoryDB {
                     name = "Bernard McMahon",
                     sizes = listOf()
                 ),
-                itemVariant = listOf(),
+                itemVariant = listOf(
+                    InventoryItemVariant(
+                        id = "nonumes",
+                        color = "tempus",
+                        quantity = 4939,
+                        size = "2.2"
+                    ),
+                    InventoryItemVariant(
+                        id = "praesent",
+                        color = "vestibulum",
+                        quantity = 5842,
+                        size = "2.4"
+                    )
+                ),
                 totalQuantity = 4212,
                 weight = 10.11,
                 supplier = InventorySupplier(

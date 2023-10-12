@@ -13,9 +13,7 @@ import java.util.UUID
 class GetInventoryItem(
     private val database: InMemoryDB = InMemoryDB,
 ) {
-    val value = database.inventoryItemsFlow.map {
-        ComposeStable(it)
-    }
+    val value = database.inventoryItemsFlow
 }
 
 class CreateInventoryItem(
