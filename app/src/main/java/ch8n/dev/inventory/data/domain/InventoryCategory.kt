@@ -78,3 +78,9 @@ data class InventoryItemVariant(
         )
     }
 }
+
+data class Order(
+    val totalPrice : Int,
+    val totalWeight: Double,
+    val items : List<InventoryItem>
+)
