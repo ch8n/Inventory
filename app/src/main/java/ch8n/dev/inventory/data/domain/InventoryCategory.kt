@@ -60,18 +60,27 @@ data class InventoryItemVariant(
     val id: String = UUID.randomUUID().toString(),
     val color: String,
     val quantity: Int,
+    val size: String,
 ) {
     companion object {
         val New
             get() = InventoryItemVariant(
                 color = "",
-                quantity = 0
+                quantity = 0,
+                size = "",
             )
 
         val Empty = InventoryItemVariant(
             id = "",
             color = "",
-            quantity = 0
+            quantity = 0,
+            size = ""
         )
     }
 }
+
+data class Order(
+    val totalPrice : Int,
+    val totalWeight: Double,
+    val items : List<InventoryItem>
+)

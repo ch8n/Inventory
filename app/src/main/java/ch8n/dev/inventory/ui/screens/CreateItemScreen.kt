@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material.icons.rounded.Delete
@@ -227,9 +228,7 @@ fun CreateItemScreen() {
             }
 
             itemsIndexed(itemVariants.value) { index, variant ->
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.sdp)
@@ -237,62 +236,95 @@ fun CreateItemScreen() {
 
                     var color by rememberMutableState(init = variant.color)
                     var quanitity by remember { mutableStateOf(variant.quantity) }
+                    var size by rememberMutableState(init = "")
 
-                    LaunchedEffect(color, quanitity) {
+                    LaunchedEffect(color, quanitity, size) {
                         val current = itemVariants.value.toMutableList()
                         current.set(
                             index,
-                            variant.copy(color = color, quantity = quanitity)
+                            variant.copy(color = color, quantity = quanitity, size = size)
                         )
                         itemVariants = ComposeStable(current)
                     }
-
-                    OutlinedTextField(
-                        value = color,
-                        onValueChange = { color = it },
-                        label = { Text(text = "Color") },
-                        modifier = Modifier.fillMaxWidth(0.5f),
-                        maxLines = 1,
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = Color.DarkGray
-                        )
-                    )
 
                     Row(
-                        horizontalArrangement = Arrangement.SpaceAround,
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
 
-                        IconButton(onClick = { quanitity += 1 }) {
+                        IconButton(
+                            onClick = {
+                                val current = itemVariants.value.toMutableList()
+                                current.removeAt(index)
+                                itemVariants = ComposeStable(current)
+                            },
+                            modifier = Modifier.size(24.sdp)
+                        ) {
                             Icon(
-                                imageVector = Icons.Rounded.KeyboardArrowUp,
+                                imageVector = Icons.Outlined.Clear,
                                 contentDescription = null
                             )
                         }
 
-                        Text(
-                            text = quanitity.toString(),
-                            color = Color.DarkGray,
-                            fontSize = 14.ssp
+                        OutlinedTextField(
+                            value = color,
+                            onValueChange = { color = it },
+                            label = { Text(text = "Color") },
+                            modifier = Modifier.fillMaxWidth(0.35f),
+                            maxLines = 1,
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                textColor = Color.DarkGray
+                            )
                         )
 
-                        IconButton(onClick = { quanitity -= 1 }) {
-                            Icon(
-                                imageVector = Icons.Rounded.KeyboardArrowDown,
-                                contentDescription = null
+                        Box {
+                            val dropdownOptions = remember(selectedCategory) {
+                                ComposeStable(selectedCategory.sizes)
+                            }
+
+                            Text(
+                                text = "Size",
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(top = 4.sdp),
+                                fontSize = 12.ssp,
+                                color = Color.Gray
+                            )
+                            OptionDropDown(
+                                title = size,
+                                dropdownOptions = dropdownOptions,
+                                onSelected = { index ->
+                                    size = selectedCategory.sizes.get(index)
+                                }
                             )
                         }
-                    }
 
-                    IconButton(onClick = {
-                        val current = itemVariants.value.toMutableList()
-                        current.removeAt(index)
-                        itemVariants = ComposeStable(current)
-                    }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Delete,
-                            contentDescription = null
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceAround,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            IconButton(onClick = { quanitity += 1 }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.KeyboardArrowUp,
+                                    contentDescription = null
+                                )
+                            }
+
+                            Text(
+                                text = quanitity.toString(),
+                                color = Color.DarkGray,
+                                fontSize = 14.ssp
+                            )
+
+                            IconButton(onClick = { quanitity -= 1 }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.KeyboardArrowDown,
+                                    contentDescription = null
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -459,9 +491,13 @@ fun OptionDropDown(
         OutlinedButton(
             onClick = {
                 popupMenuOpen = !popupMenuOpen
-            }
-        ) {
-            Text(text = title)
+            },
+
+            ) {
+            Text(
+                text = title,
+                fontSize = 14.ssp
+            )
         }
         DropdownMenu(
             expanded = popupMenuOpen,

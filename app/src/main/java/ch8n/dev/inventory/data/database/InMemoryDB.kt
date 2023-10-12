@@ -35,7 +35,48 @@ object InMemoryDB {
             ),
         )
     )
-    private val inventoryItems = MutableStateFlow<List<InventoryItem>>(emptyList())
+    private val inventoryItems = MutableStateFlow<List<InventoryItem>>(
+        listOf(
+            InventoryItem(
+                id = "suscipiantur",
+                name = "Dawn Strong",
+                images = listOf(),
+                category = InventoryCategory(
+                    id = "mazim",
+                    name = "Tracie Howard",
+                    sizes = listOf()
+                ),
+                itemVariant = listOf(),
+                totalQuantity = 20,
+                weight = 6.7,
+                supplier = InventorySupplier(
+                    id = "fusce",
+                    name = "Marcie Barlow"
+                ),
+                sellingPrice = 9861,
+                purchasePrice = 9662
+            ),
+            InventoryItem(
+                id = "epicuri",
+                name = "Wiley Ryan",
+                images = listOf(),
+                category = InventoryCategory(
+                    id = "montes",
+                    name = "Bernard McMahon",
+                    sizes = listOf()
+                ),
+                itemVariant = listOf(),
+                totalQuantity = 4212,
+                weight = 10.11,
+                supplier = InventorySupplier(
+                    id = "his",
+                    name = "Jay Wall"
+                ),
+                sellingPrice = 5741,
+                purchasePrice = 8908
+            )
+        )
+    )
 
     val inventoryCategoriesFlow = inventoryCategories.asStateFlow()
     val inventoryItemsFlow = inventoryItems.asStateFlow()
