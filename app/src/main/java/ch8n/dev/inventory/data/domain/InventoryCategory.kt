@@ -7,12 +7,13 @@ data class InventoryItem(
     val name: String,
     val images: List<String>,
     val category: InventoryCategory,
-    val itemVariant: List<InventoryItemVariant>,
-    val totalQuantity: Int,
+    val itemQuantity: Int,
     val weight: Double,
     val supplier: InventorySupplier,
     val sellingPrice: Int,
-    val purchasePrice: Int
+    val purchasePrice: Int,
+    val itemSize: String,
+    val itemColor: String,
 ) {
     companion object {
         val Empty = InventoryItem(
@@ -20,12 +21,13 @@ data class InventoryItem(
             name = "",
             images = listOf(),
             category = InventoryCategory.Empty,
-            itemVariant = emptyList(),
             supplier = InventorySupplier.Empty,
             sellingPrice = 0,
             purchasePrice = 0,
-            totalQuantity = 0,
+            itemQuantity = 0,
             weight = 0.0,
+            itemSize = "",
+            itemColor = "",
         )
     }
 }

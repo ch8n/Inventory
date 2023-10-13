@@ -28,7 +28,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -162,7 +161,6 @@ fun CreateOrderScreen() {
 
             itemsIndexed(items.value) { index, item ->
 
-
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -184,66 +182,37 @@ fun CreateOrderScreen() {
 
                         Column {
                             Text(text = item.name)
-                            Text(text = "Selling ${item.sellingPrice}")
-                            Text(text = "Weight ${item.weight}")
-                            Text(text = "Total Qty : ${item.totalQuantity}")
+                            Text(text = "Color : ${item.itemColor}")
+                            Text(text = "Size : ${item.itemSize}")
+                            Text(text = "Weight : ${item.weight}")
+                            Text(text = "Total Quantity : ${item.itemQuantity}")
+                            Text(text = "Selling : ${item.sellingPrice}")
                         }
                     }
 
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .border(2.sdp, Color.Gray)
-                                .padding(4.sdp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(text = "color")
-                            Text(text = "Stock")
-                            Text(text = "Size")
-                            Text(text = "Order")
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        IconButton(onClick = {  }) {
+                            Icon(
+                                imageVector = Icons.Rounded.KeyboardArrowUp,
+                                contentDescription = null
+                            )
                         }
-                        item.itemVariant.forEach { varient ->
 
-                            var quanitity by rememberMutableState(init = 0)
+                        Text(
+                            text = 0.toString(),
+                            color = Color.DarkGray,
+                            fontSize = 14.ssp
+                        )
 
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .border(2.sdp, Color.Gray)
-                                    .padding(4.sdp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(text = varient.color)
-                                Text(text = "${varient.quantity}")
-                                Text(text = "${varient.size}")
-
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceAround,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-
-                                    IconButton(onClick = { quanitity += 1 }) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.KeyboardArrowUp,
-                                            contentDescription = null
-                                        )
-                                    }
-
-                                    Text(
-                                        text = quanitity.toString(),
-                                        color = Color.DarkGray,
-                                        fontSize = 14.ssp
-                                    )
-
-                                    IconButton(onClick = { quanitity -= 1 }) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.KeyboardArrowDown,
-                                            contentDescription = null
-                                        )
-                                    }
-                                }
-                            }
+                        IconButton(onClick = {  }) {
+                            Icon(
+                                imageVector = Icons.Rounded.KeyboardArrowDown,
+                                contentDescription = null
+                            )
                         }
                     }
                 }

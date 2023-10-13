@@ -47,28 +47,16 @@ object InMemoryDB {
                     name = "Tracie Howard",
                     sizes = listOf()
                 ),
-                itemVariant = listOf(
-                    InventoryItemVariant(
-                        id = "nonumes",
-                        color = "tempus",
-                        quantity = 4939,
-                        size = "2.2"
-                    ),
-                    InventoryItemVariant(
-                        id = "praesent",
-                        color = "vestibulum",
-                        quantity = 5842,
-                        size = "2.4"
-                    )
-                ),
-                totalQuantity = 20,
+                itemQuantity = 20,
                 weight = 6.7,
                 supplier = InventorySupplier(
                     id = "fusce",
                     name = "Marcie Barlow"
                 ),
                 sellingPrice = 9861,
-                purchasePrice = 9662
+                purchasePrice = 9662,
+                itemSize = "2.2",
+                itemColor = "Red"
             ),
             InventoryItem(
                 id = "epicuri",
@@ -79,21 +67,9 @@ object InMemoryDB {
                     name = "Bernard McMahon",
                     sizes = listOf()
                 ),
-                itemVariant = listOf(
-                    InventoryItemVariant(
-                        id = "nonumes",
-                        color = "tempus",
-                        quantity = 4939,
-                        size = "2.2"
-                    ),
-                    InventoryItemVariant(
-                        id = "praesent",
-                        color = "vestibulum",
-                        quantity = 5842,
-                        size = "2.4"
-                    )
-                ),
-                totalQuantity = 4212,
+                itemSize = "2.4",
+                itemColor = "Blue",
+                itemQuantity = 4212,
                 weight = 10.11,
                 supplier = InventorySupplier(
                     id = "his",

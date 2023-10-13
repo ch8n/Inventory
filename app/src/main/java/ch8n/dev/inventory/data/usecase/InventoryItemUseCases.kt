@@ -1,12 +1,9 @@
 package ch8n.dev.inventory.data.usecase
 
-import ch8n.dev.inventory.ComposeStable
 import ch8n.dev.inventory.data.database.InMemoryDB
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
-import ch8n.dev.inventory.data.domain.InventoryItemVariant
 import ch8n.dev.inventory.data.domain.InventorySupplier
-import kotlinx.coroutines.flow.map
 import java.util.UUID
 
 
@@ -23,24 +20,26 @@ class CreateInventoryItem(
         name: String,
         images: List<String>,
         category: InventoryCategory,
-        itemVariant: List<InventoryItemVariant>,
-        totalQuantity: Int,
+        itemQuantity: Int,
         weight: Double,
         supplier: InventorySupplier,
         sellPrice: Int,
-        purchasePrice: Int
+        purchasePrice: Int,
+        itemSize: String,
+        itemColor : String
     ) {
         val item = InventoryItem(
             id = UUID.randomUUID().toString(),
             name = name,
             images = images,
             category = category,
-            itemVariant = itemVariant,
-            totalQuantity = totalQuantity,
+            itemQuantity = itemQuantity,
             weight = weight,
             supplier = supplier,
             sellingPrice = sellPrice,
             purchasePrice = purchasePrice,
+            itemSize = itemSize,
+            itemColor = itemColor
         )
         database.addInventoryItem(item)
     }
@@ -54,23 +53,25 @@ class UpdateInventoryItem(
         name: String = current.name,
         images: List<String> = current.images,
         category: InventoryCategory = current.category,
-        itemVariant: List<InventoryItemVariant> = current.itemVariant,
-        totalQuantity: Int = current.totalQuantity,
+        itemSize: String = current.itemSize,
+        totalQuantity: Int = current.itemQuantity,
         weight: Double = current.weight,
         supplier: InventorySupplier = current.supplier,
         sellPrice: Int = current.sellingPrice,
-        purchasePrice: Int = current.purchasePrice
+        purchasePrice: Int = current.purchasePrice,
+        itemColor : String = current.itemColor
     ) {
         val item = current.copy(
             name = name,
             images = images,
             category = category,
-            itemVariant = itemVariant,
-            totalQuantity = totalQuantity,
+            itemSize = itemSize,
+            itemQuantity = totalQuantity,
             weight = weight,
             supplier = supplier,
             sellingPrice = sellPrice,
             purchasePrice = purchasePrice,
+            itemColor = itemColor
         )
         database.editInventoryItem(item)
     }
