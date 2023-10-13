@@ -1,5 +1,6 @@
 package ch8n.dev.inventory.ui.screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -44,16 +44,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import ch8n.dev.inventory.ComposeStable
 import ch8n.dev.inventory.Destinations
 import ch8n.dev.inventory.data.domain.InventoryCategory
-import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
 import ch8n.dev.inventory.ui.LocalAppStore
 import ch8n.dev.inventory.ui.LocalNavigator
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -64,9 +65,9 @@ fun CreateOrderScreen() {
     val store = LocalAppStore.current
     val navigator = LocalNavigator.current
     val searchQuery by store.query.collectAsState("")
-    var selectedCategory by rememberMutableState(init = InventoryCategory.Empty)
     val items by store.getQueryItem.collectAsState(initial = ComposeStable(emptyList()))
     var shortlistItem by rememberMutableState(init = mapOf<String, Int>())
+    val selectedCategory by store.selectedCategory.collectAsState()
 
     BottomSheetSelectedOrders(
         content = { bottomSheet ->
@@ -130,7 +131,9 @@ fun CreateOrderScreen() {
                             title = "Select Category",
                             dropdownOptions = dropdownOptions,
                             onSelected = { index ->
-                                selectedCategory = categories.value.get(index)
+                                scope.launch {
+                                    store.selectedCategory.emit(categories.value.get(index))
+                                }
                             }
                         )
 
@@ -148,7 +151,9 @@ fun CreateOrderScreen() {
                                 ),
                                 trailingIcon = {
                                     IconButton(onClick = {
-                                        selectedCategory = InventoryCategory.Empty
+                                        scope.launch {
+                                            store.selectedCategory.emit(InventoryCategory.Empty)
+                                        }
                                     }) {
                                         Icon(
                                             imageVector = Icons.Outlined.Delete,
@@ -161,6 +166,9 @@ fun CreateOrderScreen() {
                     }
 
                     itemsIndexed(items.value) { index, item ->
+
+                        val totalQuantity = item.itemQuantity - (shortlistItem.get(item.id) ?: 0)
+
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -185,7 +193,7 @@ fun CreateOrderScreen() {
                                     Text(text = "Color : ${item.itemColor}")
                                     Text(text = "Size : ${item.itemSize}")
                                     Text(text = "Weight : ${item.weight}")
-                                    Text(text = "Total Quantity : ${item.itemQuantity}")
+                                    Text(text = "Total Quantity : $totalQuantity")
                                     Text(text = "Selling : ${item.sellingPrice}")
                                 }
                             }
@@ -261,12 +269,23 @@ fun CreateOrderScreen() {
                         .padding(24.sdp),
                     verticalArrangement = Arrangement.spacedBy(8.sdp)
                 ) {
+
+                    val totalPrice = shortlistItem.entries.map { (key, value) ->
+                        val found = items.value.find { it.id == key } ?: return@map 0
+                        found.sellingPrice * value
+                    }.sum()
+
+                    val totalWeight = shortlistItem.entries.map { (key, value) ->
+                        val found = items.value.find { it.id == key } ?: return@map 0.0
+                        found.weight * value
+                    }.sum()
+
                     Text(
                         text = "Order Summary",
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
-                    RowSummaryText(key = "Item Total Price", value = "0")
-                    RowSummaryText(key = "Item Total Weight", value = "0")
+                    RowSummaryText(key = "Item Total Price", value = "$totalPrice")
+                    RowSummaryText(key = "Item Total Weight", value = "$totalWeight")
                 }
             }
 
@@ -299,7 +318,13 @@ fun CreateOrderScreen() {
                                 Text(text = "Color : ${item.itemColor}")
                                 Text(text = "Size : ${item.itemSize}")
                                 Text(text = "Weight : ${item.weight}")
-                                Text(text = "Total Quantity : ${item.itemQuantity}")
+                                Text(
+                                    text = "Total Quantity : ${
+                                        item.itemQuantity - (shortlistItem.get(
+                                            item.id
+                                        ) ?: 0)
+                                    }"
+                                )
                                 Text(text = "Selling : ${item.sellingPrice}")
                             }
                         }
@@ -313,7 +338,7 @@ fun CreateOrderScreen() {
                             IconButton(onClick = {
                                 val updated = orderQty + 1
                                 val current = shortlistItem.toMutableMap()
-                                if (updated > 0){
+                                if (updated > 0) {
                                     current.put(itemId, updated)
                                 } else {
                                     current.remove(itemId)
@@ -335,7 +360,7 @@ fun CreateOrderScreen() {
                             IconButton(onClick = {
                                 val updated = orderQty - 1
                                 val current = shortlistItem.toMutableMap()
-                                if (updated > 0){
+                                if (updated > 0) {
                                     current.put(itemId, updated)
                                 } else {
                                     current.remove(itemId)
@@ -353,9 +378,10 @@ fun CreateOrderScreen() {
             }
 
             item {
+                val context = LocalContext.current
                 OutlinedButton(
                     onClick = {
-                        navigator.goto(Destinations.CreateItemScreen)
+                        Toast.makeText(context, "TODO save order", Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {

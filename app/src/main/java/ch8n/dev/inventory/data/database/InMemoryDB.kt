@@ -44,14 +44,14 @@ object InMemoryDB {
                 images = listOf(),
                 category = InventoryCategory(
                     id = "mazim",
-                    name = "Tracie Howard",
+                    name = "Bangles",
                     sizes = listOf()
                 ),
                 itemQuantity = 20,
                 weight = 6.7,
                 supplier = InventorySupplier(
                     id = "fusce",
-                    name = "Marcie Barlow"
+                    name = "Lovely"
                 ),
                 sellingPrice = 9861,
                 purchasePrice = 9662,
@@ -64,7 +64,7 @@ object InMemoryDB {
                 images = listOf(),
                 category = InventoryCategory(
                     id = "montes",
-                    name = "Bernard McMahon",
+                    name = "Bangles",
                     sizes = listOf()
                 ),
                 itemSize = "2.4",
