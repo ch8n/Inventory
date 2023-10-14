@@ -14,11 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material.icons.rounded.Delete
@@ -35,10 +33,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,7 +44,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import ch8n.dev.inventory.ComposeStable
 import ch8n.dev.inventory.data.domain.InventoryCategory
-import ch8n.dev.inventory.data.domain.InventoryItemVariant
 import ch8n.dev.inventory.data.domain.InventorySupplier
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
@@ -63,12 +58,14 @@ fun CreateItemScreen() {
 
     val navigator = LocalNavigator.current
     val store = LocalAppStore.current
+
     var itemName by rememberMutableState(init = "")
     var itemImages by rememberMutableState(init = ComposeStable(listOf<String>()))
     var selectedCategory by rememberMutableState(init = InventoryCategory.Empty)
     var selectedSupplier by rememberMutableState(init = InventorySupplier.Empty)
-    var itemVariants by rememberMutableState(init = ComposeStable(listOf<InventoryItemVariant>()))
-    var totalQuantity by rememberMutableState(init = 0)
+    var selectedSize by rememberMutableState(init = "")
+    var itemColor by rememberMutableState(init = "")
+    var itemQuantity by rememberMutableState(init = 0)
     var itemWeight by rememberMutableState(init = "")
     var purchasePrice by rememberMutableState(init = "")
     var sellPrice by rememberMutableState(init = "")
@@ -201,6 +198,22 @@ fun CreateItemScreen() {
 
             item {
                 OutlinedTextField(
+                    value = itemColor,
+                    onValueChange = {
+                        itemColor = it
+                    },
+                    label = { Text(text = "Item Color") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                    maxLines = 1,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = Color.DarkGray
+                    )
+                )
+            }
+
+            item {
+                OutlinedTextField(
                     value = itemWeight,
                     onValueChange = {
                         itemWeight = it
@@ -216,136 +229,75 @@ fun CreateItemScreen() {
             }
 
             item {
-                OutlinedButton(
-                    onClick = {
-                        val current = itemVariants.value.toMutableList()
-                        current.add(InventoryItemVariant.New)
-                        itemVariants = ComposeStable(current)
-                    }
-                ) {
-                    Text(text = "+ Add Item Variant")
+
+                val dropdownOptions = remember(selectedCategory) {
+                    ComposeStable(selectedCategory.sizes)
                 }
-            }
 
-            itemsIndexed(itemVariants.value) { index, variant ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.sdp)
-                ) {
-
-                    var color by rememberMutableState(init = variant.color)
-                    var quanitity by remember { mutableStateOf(variant.quantity) }
-                    var size by rememberMutableState(init = "")
-
-                    LaunchedEffect(color, quanitity, size) {
-                        val current = itemVariants.value.toMutableList()
-                        current.set(
-                            index,
-                            variant.copy(color = color, quantity = quanitity, size = size)
-                        )
-                        itemVariants = ComposeStable(current)
+                OptionDropDown(
+                    title = "Select Size",
+                    dropdownOptions = dropdownOptions,
+                    onSelected = { index ->
+                        selectedSize = selectedCategory.sizes.get(index)
                     }
+                )
 
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-
-                        IconButton(
-                            onClick = {
-                                val current = itemVariants.value.toMutableList()
-                                current.removeAt(index)
-                                itemVariants = ComposeStable(current)
-                            },
-                            modifier = Modifier.size(24.sdp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Clear,
-                                contentDescription = null
-                            )
-                        }
-
-                        OutlinedTextField(
-                            value = color,
-                            onValueChange = { color = it },
-                            label = { Text(text = "Color") },
-                            modifier = Modifier.fillMaxWidth(0.35f),
-                            maxLines = 1,
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                textColor = Color.DarkGray
-                            )
-                        )
-
-                        Box {
-                            val dropdownOptions = remember(selectedCategory) {
-                                ComposeStable(selectedCategory.sizes)
-                            }
-
-                            Text(
-                                text = "Size",
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 4.sdp),
-                                fontSize = 12.ssp,
-                                color = Color.Gray
-                            )
-                            OptionDropDown(
-                                title = size,
-                                dropdownOptions = dropdownOptions,
-                                onSelected = { index ->
-                                    size = selectedCategory.sizes.get(index)
-                                }
-                            )
-                        }
-
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-
-                            IconButton(onClick = { quanitity += 1 }) {
+                AnimatedVisibility(visible = selectedSize.isNotEmpty()) {
+                    OutlinedTextField(
+                        value = selectedSize,
+                        onValueChange = {},
+                        label = { Text(text = "Size Selected") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.sdp),
+                        readOnly = true,
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                selectedSize = ""
+                            }) {
                                 Icon(
-                                    imageVector = Icons.Rounded.KeyboardArrowUp,
+                                    imageVector = Icons.Outlined.Delete,
                                     contentDescription = null
                                 )
                             }
-
-                            Text(
-                                text = quanitity.toString(),
-                                color = Color.DarkGray,
-                                fontSize = 14.ssp
-                            )
-
-                            IconButton(onClick = { quanitity -= 1 }) {
-                                Icon(
-                                    imageVector = Icons.Rounded.KeyboardArrowDown,
-                                    contentDescription = null
-                                )
-                            }
-                        }
-                    }
+                        },
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = Color.DarkGray
+                        )
+                    )
                 }
             }
+
 
             item {
 
-                LaunchedEffect(itemVariants) {
-                    totalQuantity = itemVariants.value.sumOf { it.quantity }
-                }
+                Text(text = "+ Item Quantity")
 
-                OutlinedTextField(
-                    value = totalQuantity.toString(),
-                    onValueChange = { },
-                    label = { Text(text = "Total Quantity") },
-                    modifier = Modifier.fillMaxWidth(0.5f),
-                    maxLines = 1,
-                    readOnly = true,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = Color.DarkGray
+                Row(
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    IconButton(onClick = { itemQuantity += 1 }) {
+                        Icon(
+                            imageVector = Icons.Rounded.KeyboardArrowUp,
+                            contentDescription = null
+                        )
+                    }
+
+                    Text(
+                        text = itemQuantity.toString(),
+                        color = Color.DarkGray,
+                        fontSize = 14.ssp
                     )
-                )
+
+                    IconButton(onClick = { itemQuantity -= 1 }) {
+                        Icon(
+                            imageVector = Icons.Rounded.KeyboardArrowDown,
+                            contentDescription = null
+                        )
+                    }
+                }
             }
 
             item {
@@ -388,12 +340,13 @@ fun CreateItemScreen() {
                     name = itemName,
                     images = itemImages.value,
                     category = selectedCategory,
-                    itemVariant = itemVariants.value,
-                    totalQuantity = totalQuantity,
+                    itemQuantity = itemQuantity,
                     weight = itemWeight.toDoubleOrNull() ?: 0.0,
                     supplier = selectedSupplier,
                     sellPrice = sellPrice.toIntOrNull() ?: 0,
-                    purchasePrice = purchasePrice.toIntOrNull() ?: 0
+                    purchasePrice = purchasePrice.toIntOrNull() ?: 0,
+                    itemSize = selectedSize,
+                    itemColor = itemColor
                 )
                 navigator.back()
             },
