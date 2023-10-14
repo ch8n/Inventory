@@ -54,29 +54,5 @@ class AppStore(
     val deleteItem: DeleteInventoryItem = DeleteInventoryItem(),
 ) {
 
-    var query = MutableStateFlow("")
-    var selectedCategory = MutableStateFlow(InventoryCategory.Empty)
-
-    val getQueryItem = query.combine(selectedCategory) { query, category ->
-        if (category.name.isEmpty()) return@combine emptyList<InventoryItem>()
-        if (query.isEmpty()) {
-            val items = getItems.value.firstOrNull() ?: emptyList<InventoryItem>()
-            return@combine items.filter {
-                it.category.name.equals(
-                    category.name,
-                    ignoreCase = true
-                )
-            }
-        }
-        val items = getItems.value.firstOrNull() ?: emptyList<InventoryItem>()
-        items.filter {
-            it.name.contains(query, ignoreCase = true) && (it.category.name.equals(
-                category.name,
-                ignoreCase = true
-            ))
-        }
-    }.map {
-        ComposeStable(it)
-    }
 
 }

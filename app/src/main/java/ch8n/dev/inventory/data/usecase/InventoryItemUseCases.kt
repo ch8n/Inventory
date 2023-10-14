@@ -4,8 +4,7 @@ import ch8n.dev.inventory.data.database.InMemoryDB
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.InventorySupplier
-import ch8n.dev.inventory.data.domain.OrderStatus
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 
@@ -14,6 +13,24 @@ class GetInventoryItem(
     private val database: InMemoryDB = InMemoryDB,
 ) {
     val value = database.inventoryItemsFlow
+
+    fun filter(
+        searchQuery: String,
+        selectedCategory: InventoryCategory
+    ): Flow<List<InventoryItem>> {
+        return value.map { items ->
+            items
+                .filter { it.category == selectedCategory }
+                .filter {
+                    if (searchQuery.isNotEmpty()) {
+                        return@filter it.name.contains(searchQuery, ignoreCase = true)
+                    } else {
+                        true
+                    }
+                }
+
+        }
+    }
 }
 
 
@@ -30,7 +47,7 @@ class CreateInventoryItem(
         sellPrice: Int,
         purchasePrice: Int,
         itemSize: String,
-        itemColor : String
+        itemColor: String
     ) {
         val item = InventoryItem(
             id = UUID.randomUUID().toString(),
@@ -63,7 +80,7 @@ class UpdateInventoryItem(
         supplier: InventorySupplier = current.supplier,
         sellPrice: Int = current.sellingPrice,
         purchasePrice: Int = current.purchasePrice,
-        itemColor : String = current.itemColor
+        itemColor: String = current.itemColor
     ) {
         val item = current.copy(
             name = name,

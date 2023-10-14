@@ -1,6 +1,5 @@
 package ch8n.dev.inventory.ui.screens
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +23,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.rememberModalBottomSheetState
@@ -37,7 +35,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -46,11 +43,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import ch8n.dev.inventory.ComposeStable
-import ch8n.dev.inventory.Destinations
 import ch8n.dev.inventory.data.domain.InventoryCategory
-import ch8n.dev.inventory.data.domain.InventorySupplier
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.data.usecase.ItemOrder
 import ch8n.dev.inventory.rememberMutableState
@@ -59,7 +53,6 @@ import ch8n.dev.inventory.ssp
 import ch8n.dev.inventory.ui.LocalAppStore
 import ch8n.dev.inventory.ui.LocalNavigator
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -69,10 +62,11 @@ fun CreateOrderScreen() {
     val scope = rememberCoroutineScope()
     val store = LocalAppStore.current
     val navigator = LocalNavigator.current
-    val searchQuery by store.query.collectAsState("")
-    val items by store.getQueryItem.collectAsState(initial = ComposeStable(emptyList()))
+    var searchQuery by rememberMutableState(init = "")
+    var selectedCategory by rememberMutableState(init = InventoryCategory.Empty)
+    val items by store.getItems.filter(searchQuery, selectedCategory)
+        .collectAsState(initial = emptyList())
     var shortlistItem by rememberMutableState(init = mapOf<String, Int>())
-    val selectedCategory by store.selectedCategory.collectAsState()
     var selectedOrderStatus by rememberMutableState<OrderStatus>(init = OrderStatus.NEW_ORDER)
 
     BottomSheetSelectedOrders(
@@ -105,7 +99,7 @@ fun CreateOrderScreen() {
                         OutlinedTextField(
                             value = searchQuery,
                             onValueChange = {
-                                store.query.tryEmit(it)
+                                searchQuery = it
                             },
                             label = { Text(text = "Search Item") },
                             modifier = Modifier.fillMaxWidth(),
@@ -114,7 +108,7 @@ fun CreateOrderScreen() {
                             ),
                             trailingIcon = {
                                 IconButton(onClick = {
-                                    store.query.tryEmit("")
+                                    searchQuery = ""
                                 }) {
                                     Icon(
                                         imageVector = Icons.Outlined.Delete,
@@ -137,9 +131,7 @@ fun CreateOrderScreen() {
                             title = "Select Category",
                             dropdownOptions = dropdownOptions,
                             onSelected = { index ->
-                                scope.launch {
-                                    store.selectedCategory.emit(categories.value.get(index))
-                                }
+                                selectedCategory = categories.value.get(index)
                             }
                         )
 
@@ -157,9 +149,7 @@ fun CreateOrderScreen() {
                                 ),
                                 trailingIcon = {
                                     IconButton(onClick = {
-                                        scope.launch {
-                                            store.selectedCategory.emit(InventoryCategory.Empty)
-                                        }
+                                        selectedCategory = InventoryCategory.Empty
                                     }) {
                                         Icon(
                                             imageVector = Icons.Outlined.Delete,
@@ -171,7 +161,7 @@ fun CreateOrderScreen() {
                         }
                     }
 
-                    itemsIndexed(items.value) { index, item ->
+                    itemsIndexed(items) { index, item ->
 
                         val totalQuantity = item.itemQuantity - (shortlistItem.get(item.id) ?: 0)
 
@@ -265,12 +255,12 @@ fun CreateOrderScreen() {
         var orderComment by rememberMutableState(init = "")
 
         val totalPrice = shortlistItem.entries.map { (key, value) ->
-            val found = items.value.find { it.id == key } ?: return@map 0
+            val found = items.find { it.id == key } ?: return@map 0
             found.sellingPrice * value
         }.sum()
 
         val totalWeight = shortlistItem.entries.map { (key, value) ->
-            val found = items.value.find { it.id == key } ?: return@map 0.0
+            val found = items.find { it.id == key } ?: return@map 0.0
             found.weight * value
         }.sum()
 
@@ -360,7 +350,7 @@ fun CreateOrderScreen() {
                         .padding(8.sdp)
                 ) {
 
-                    val item = remember(itemId) { items.value.find { it.id == itemId } }
+                    val item = remember(itemId) { items.find { it.id == itemId } }
 
                     if (item != null) {
 
@@ -466,7 +456,6 @@ fun CreateOrderScreen() {
             }
 
             item {
-                val context = LocalContext.current
                 OutlinedButton(
                     onClick = {
                         store.creatOrder.execute(
