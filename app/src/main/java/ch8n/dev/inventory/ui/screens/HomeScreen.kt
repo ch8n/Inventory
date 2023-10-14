@@ -90,6 +90,17 @@ fun HomeScreen() {
                 }
             }
 
+            item {
+                OutlinedButton(
+                    onClick = {
+                        navigator.goto(Destinations.ManageOrdersScreen)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "+ Manage Order")
+                }
+            }
+
         }
     }
 }

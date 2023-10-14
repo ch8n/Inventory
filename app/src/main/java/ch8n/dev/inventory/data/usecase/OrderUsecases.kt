@@ -2,6 +2,7 @@ package ch8n.dev.inventory.data.usecase
 
 import ch8n.dev.inventory.data.database.InMemoryDB
 import ch8n.dev.inventory.data.domain.Order
+import ch8n.dev.inventory.data.domain.OrderStatus
 
 
 data class ItemOrder(
@@ -19,6 +20,7 @@ class CreateOrder(
         totalPrice: Int,
         totalWeight: Double,
         itemsIds: List<ItemOrder>,
+        orderStatus: OrderStatus,
     ) {
         val order = Order(
             clientName = clientName,
@@ -26,7 +28,8 @@ class CreateOrder(
             totalPrice = totalPrice,
             totalWeight = totalWeight,
             itemsIds = itemsIds,
-            contact = contact
+            contact = contact,
+            orderStatus = orderStatus
         )
         database.addNewOrder(order)
     }

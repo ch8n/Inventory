@@ -82,6 +82,16 @@ data class InventoryItemVariant(
     }
 }
 
+
+enum class OrderStatus {
+    NEW_ORDER,
+    PACKING,
+    PACKED,
+    DISPATCHED,
+    DELIVERED,
+    ISSUE
+}
+
 data class Order(
     val clientName: String,
     val contact: String,
@@ -89,5 +99,6 @@ data class Order(
     val totalPrice: Int,
     val totalWeight: Double,
     val itemsIds: List<ItemOrder>,
-    val createdAt: Long = System.currentTimeMillis()
+    val orderStatus: OrderStatus,
+    val createdAt: Long = System.currentTimeMillis(),
 )

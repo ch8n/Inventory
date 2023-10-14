@@ -24,6 +24,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.rememberModalBottomSheetState
@@ -50,6 +51,7 @@ import ch8n.dev.inventory.ComposeStable
 import ch8n.dev.inventory.Destinations
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventorySupplier
+import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.data.usecase.ItemOrder
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
@@ -71,6 +73,7 @@ fun CreateOrderScreen() {
     val items by store.getQueryItem.collectAsState(initial = ComposeStable(emptyList()))
     var shortlistItem by rememberMutableState(init = mapOf<String, Int>())
     val selectedCategory by store.selectedCategory.collectAsState()
+    var selectedOrderStatus by rememberMutableState<OrderStatus>(init = OrderStatus.NEW_ORDER)
 
     BottomSheetSelectedOrders(
         content = { bottomSheet ->
@@ -337,6 +340,18 @@ fun CreateOrderScreen() {
                 }
             }
 
+            item {
+                val orderStatus = OrderStatus.values()
+
+                OptionDropDown(
+                    title = "Order Status ${selectedOrderStatus.name}",
+                    dropdownOptions = ComposeStable(orderStatus.map { it.name }),
+                    onSelected = { index ->
+                        selectedOrderStatus = orderStatus.get(index)
+                    }
+                )
+            }
+
             itemsIndexed(shortlistItem.entries.toList()) { index, (itemId, orderQty) ->
                 Column(
                     modifier = Modifier
@@ -462,7 +477,8 @@ fun CreateOrderScreen() {
                             totalWeight = totalWeight,
                             itemsIds = shortlistItem.entries.map { (key, value) ->
                                 ItemOrder(key, value)
-                            }
+                            },
+                            orderStatus = selectedOrderStatus
                         )
                         navigator.back()
                     },
