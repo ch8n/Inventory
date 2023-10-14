@@ -3,20 +3,28 @@ package ch8n.dev.inventory.ui.screens
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -35,6 +43,7 @@ import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
 import ch8n.dev.inventory.ui.LocalAppStore
 import ch8n.dev.inventory.ui.LocalNavigator
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -47,83 +56,116 @@ fun ManageOrderScreen() {
 
     val orderStatuses = OrderStatus.values()
     val pageState = rememberPagerState()
+    var searchQuery by rememberMutableState(init = "")
 
-    HorizontalPager(
-        pageCount = orderStatuses.size,
-        state = pageState
-    ) { pageIndex ->
 
-        val orderStatus = orderStatuses.get(pageIndex)
-        var searchQuery by rememberMutableState(init = "")
-        val orders by store.getOrders.filter(orderStatus, searchQuery)
-            .collectAsState(emptyList())
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
 
-        LazyColumn {
-
-            item {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = {
-                        searchQuery = it
-                    },
-                    label = { Text(text = "Search by Contact or Email") },
-                    modifier = Modifier
-                        .padding(16.sdp)
-                        .fillMaxWidth(),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = Color.DarkGray
-                    ),
-                    trailingIcon = {
-                        IconButton(onClick = {
-                            searchQuery = ""
-                        }) {
-                            Icon(
-                                imageVector = Icons.Outlined.Delete,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                )
-            }
-
-            item {
-                Text(
-                    text = "${orderStatus.name} Tab",
-                    fontSize = 32.ssp,
-                    color = Color.DarkGray
-                )
-            }
-
-            item {
-                Divider(modifier = Modifier.padding(bottom = 24.sdp))
-            }
-
-            items(orders) { order ->
-                Column(
-                    modifier = Modifier
-                        .padding(16.sdp)
-                        .fillMaxWidth()
-                        .border(2.sdp, Color.DarkGray)
-                        .padding(8.sdp)
-                        .clickable {
-                            navigator.goto(Destinations.UpdateOrdersScreen(order = order))
-                        }
-                ) {
-                    Text(text = order.clientName)
-                    Text(text = "Contact : ${order.contact}")
-                    Text(text = "Ordered At : ${order.createdAt}")
-                    Text(text = "Total Order Items : ${order.itemsIds.size}")
-                    Text(text = "Total Weight : ${order.totalWeight} gms")
-                    Text(text = "Total Price : Rs.${order.totalPrice}")
-                    Text(
-                        text = "Comment : ${order.comment}",
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 2
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = {
+                searchQuery = it
+            },
+            label = { Text(text = "Search by Contact or Email") },
+            modifier = Modifier
+                .padding(16.sdp)
+                .fillMaxWidth(),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = Color.DarkGray
+            ),
+            trailingIcon = {
+                IconButton(onClick = {
+                    searchQuery = ""
+                }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = null
                     )
                 }
             }
+        )
+
+        HorizontalPager(
+            pageCount = orderStatuses.size,
+            state = pageState,
+            modifier = Modifier
+                .padding(24.sdp)
+                .fillMaxWidth()
+                .fillMaxHeight(0.9f)
+        ) { pageIndex ->
+
+            val orderStatus = orderStatuses.get(pageIndex)
+            val orders by store.getOrders.filter(orderStatus, searchQuery)
+                .collectAsState(emptyList())
+
+            LazyColumn {
+
+                item {
+                    Text(
+                        text = "${orderStatus.name} Tab",
+                        fontSize = 32.ssp,
+                        color = Color.DarkGray
+                    )
+                }
+
+                item {
+                    Divider(modifier = Modifier.padding(bottom = 24.sdp))
+                }
+
+                items(orders) { order ->
+                    Column(
+                        modifier = Modifier
+                            .padding(16.sdp)
+                            .fillMaxWidth()
+                            .border(2.sdp, Color.DarkGray)
+                            .padding(8.sdp)
+                            .clickable {
+                                navigator.goto(Destinations.UpdateOrdersScreen(order = order))
+                            }
+                    ) {
+                        Text(text = order.clientName)
+                        Text(text = "Contact : ${order.contact}")
+                        Text(text = "Ordered At : ${order.createdAt}")
+                        Text(text = "Total Order Items : ${order.itemsIds.size}")
+                        Text(text = "Total Weight : ${order.totalWeight} gms")
+                        Text(text = "Total Price : Rs.${order.totalPrice}")
+                        Text(
+                            text = "Comment : ${order.comment}",
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 2
+                        )
+                    }
+                }
+            }
+
         }
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(
+                    rememberScrollState()
+                ),
+        ) {
+            orderStatuses.forEachIndexed { index, orderStatus ->
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            pageState.animateScrollToPage(index)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.sdp)
+                ) {
+                    Text(text = orderStatus.name)
+                }
+            }
+
+            Box(modifier = Modifier.width(100.sdp))
+        }
     }
 
 }
