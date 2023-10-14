@@ -22,8 +22,11 @@ class GetOrders(
             it.filter { it.orderStatus == orderStatus }
                 .filter {
                     if (searchQuery.isNotEmpty()) {
-                        return@filter it.contact.contains(searchQuery) || it.clientName.contains(
-                            searchQuery
+                        return@filter it.contact.contains(
+                            searchQuery,
+                            ignoreCase = true
+                        ) || it.clientName.contains(
+                            searchQuery, ignoreCase = true
                         )
                     } else {
                         true
