@@ -2,8 +2,8 @@ package ch8n.dev.inventory.data.database
 
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
-import ch8n.dev.inventory.data.domain.InventoryItemVariant
 import ch8n.dev.inventory.data.domain.InventorySupplier
+import ch8n.dev.inventory.data.domain.Order
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -81,9 +81,12 @@ object InMemoryDB {
         )
     )
 
+    private val orders = MutableStateFlow(listOf<Order>())
+
     val inventoryCategoriesFlow = inventoryCategories.asStateFlow()
     val inventoryItemsFlow = inventoryItems.asStateFlow()
     val inventorySupplierFlow = inventorySupplier.asStateFlow()
+    val ordersFlow = orders.asStateFlow()
 
     fun addSuppliers(suppliers: List<InventorySupplier>) {
         inventorySupplier.update { current ->
@@ -124,6 +127,12 @@ object InMemoryDB {
     fun deleteInventoryItem(itemId: String) {
         inventoryItems.update { current ->
             current.filter { it.id != itemId }
+        }
+    }
+
+    fun addNewOrder(order: Order) {
+        orders.update { current ->
+            current + order
         }
     }
 }

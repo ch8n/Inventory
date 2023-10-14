@@ -1,5 +1,6 @@
 package ch8n.dev.inventory.data.domain
 
+import ch8n.dev.inventory.data.usecase.ItemOrder
 import java.util.UUID
 
 data class InventoryItem(
@@ -82,7 +83,11 @@ data class InventoryItemVariant(
 }
 
 data class Order(
-    val totalPrice : Int,
+    val clientName: String,
+    val contact: String,
+    val comment: String,
+    val totalPrice: Int,
     val totalWeight: Double,
-    val items : List<InventoryItem>
+    val itemsIds: List<ItemOrder>,
+    val createdAt: Long = System.currentTimeMillis()
 )

@@ -15,13 +15,6 @@ class GetInventoryCategory(
     }
 }
 
-class GetInventorySupplier(
-    private val database: InMemoryDB = InMemoryDB,
-) {
-    val value = database.inventorySupplierFlow.map {
-        ComposeStable(it)
-    }
-}
 
 class CreateInventorySuppliers(
     private val database: InMemoryDB = InMemoryDB,
