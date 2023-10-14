@@ -22,6 +22,7 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
@@ -48,6 +49,8 @@ import androidx.compose.ui.platform.LocalContext
 import ch8n.dev.inventory.ComposeStable
 import ch8n.dev.inventory.Destinations
 import ch8n.dev.inventory.data.domain.InventoryCategory
+import ch8n.dev.inventory.data.domain.InventorySupplier
+import ch8n.dev.inventory.data.usecase.ItemOrder
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
@@ -254,36 +257,81 @@ fun CreateOrderScreen() {
         }
     ) { bottomSheet ->
 
+        var clientName by rememberMutableState(init = "")
+        var clientContact by rememberMutableState(init = "")
+        var orderComment by rememberMutableState(init = "")
+
+        val totalPrice = shortlistItem.entries.map { (key, value) ->
+            val found = items.value.find { it.id == key } ?: return@map 0
+            found.sellingPrice * value
+        }.sum()
+
+        val totalWeight = shortlistItem.entries.map { (key, value) ->
+            val found = items.value.find { it.id == key } ?: return@map 0.0
+            found.weight * value
+        }.sum()
+
         LazyColumn(
             Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.8f)
+                .fillMaxHeight(0.9f)
         ) {
             item {
                 Column(
                     Modifier
                         .padding(vertical = 16.sdp)
                         .fillMaxWidth()
-                        .height(150.sdp)
+                        .height(300.sdp)
                         .border(2.sdp, Color.DarkGray)
                         .padding(24.sdp),
                     verticalArrangement = Arrangement.spacedBy(8.sdp)
                 ) {
 
-                    val totalPrice = shortlistItem.entries.map { (key, value) ->
-                        val found = items.value.find { it.id == key } ?: return@map 0
-                        found.sellingPrice * value
-                    }.sum()
-
-                    val totalWeight = shortlistItem.entries.map { (key, value) ->
-                        val found = items.value.find { it.id == key } ?: return@map 0.0
-                        found.weight * value
-                    }.sum()
-
                     Text(
                         text = "Order Summary",
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
+
+                    OutlinedTextField(
+                        value = clientName,
+                        onValueChange = { clientName = it },
+                        label = { Text(text = "Client Name") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = Color.DarkGray
+                        ),
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                clientName = ""
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Clear,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    )
+
+                    OutlinedTextField(
+                        value = clientContact,
+                        onValueChange = { clientContact = it },
+                        label = { Text(text = "Contact Number") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = Color.DarkGray
+                        ),
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                clientContact = ""
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Clear,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    )
+
                     RowSummaryText(key = "Item Total Price", value = "$totalPrice")
                     RowSummaryText(key = "Item Total Weight", value = "$totalWeight")
                 }
@@ -377,11 +425,46 @@ fun CreateOrderScreen() {
                 }
             }
 
+
+            item {
+                OutlinedTextField(
+                    value = orderComment,
+                    onValueChange = { orderComment = it },
+                    label = { Text(text = "Any Special Comment/Notes?") },
+                    modifier = Modifier
+                        .padding(16.sdp)
+                        .fillMaxWidth(),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = Color.DarkGray
+                    ),
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            orderComment = ""
+                        }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Clear,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                )
+            }
+
             item {
                 val context = LocalContext.current
                 OutlinedButton(
                     onClick = {
-                        Toast.makeText(context, "TODO save order", Toast.LENGTH_SHORT).show()
+                        store.creatOrder.execute(
+                            clientName = clientName,
+                            contact = clientContact,
+                            comment = orderComment,
+                            totalPrice = totalPrice,
+                            totalWeight = totalWeight,
+                            itemsIds = shortlistItem.entries.map { (key, value) ->
+                                ItemOrder(key, value)
+                            }
+                        )
+                        navigator.back()
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {

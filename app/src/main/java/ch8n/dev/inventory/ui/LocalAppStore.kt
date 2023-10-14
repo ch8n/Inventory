@@ -11,6 +11,7 @@ import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.usecase.CreateInventoryCategory
 import ch8n.dev.inventory.data.usecase.CreateInventoryItem
 import ch8n.dev.inventory.data.usecase.CreateInventorySuppliers
+import ch8n.dev.inventory.data.usecase.CreateOrder
 import ch8n.dev.inventory.data.usecase.DeleteInventoryCategory
 import ch8n.dev.inventory.data.usecase.DeleteInventoryItem
 import ch8n.dev.inventory.data.usecase.GetInventoryCategory
@@ -46,6 +47,7 @@ class AppStore(
     val updateCategory: UpdateInventoryCategory = UpdateInventoryCategory(),
     val deleteCategory: DeleteInventoryCategory = DeleteInventoryCategory(),
     val createItem: CreateInventoryItem = CreateInventoryItem(),
+    val creatOrder: CreateOrder = CreateOrder(),
     val updateItem: UpdateInventoryItem = UpdateInventoryItem(),
     val deleteItem: DeleteInventoryItem = DeleteInventoryItem(),
 ) {

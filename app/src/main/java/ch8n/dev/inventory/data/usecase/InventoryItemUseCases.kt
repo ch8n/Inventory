@@ -13,6 +13,7 @@ class GetInventoryItem(
     val value = database.inventoryItemsFlow
 }
 
+
 class CreateInventoryItem(
     private val database: InMemoryDB = InMemoryDB,
 ) {
