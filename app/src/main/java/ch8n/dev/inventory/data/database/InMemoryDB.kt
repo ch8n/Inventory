@@ -4,6 +4,7 @@ import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.InventorySupplier
 import ch8n.dev.inventory.data.domain.Order
+import ch8n.dev.inventory.data.domain.OrderStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -81,7 +82,55 @@ object InMemoryDB {
         )
     )
 
-    private val orders = MutableStateFlow(listOf<Order>())
+    private val orders = MutableStateFlow(
+        listOf<Order>(
+            Order(
+                id = "utinam",
+                clientName = "Jeremiah Cline 1",
+                contact = "curabitur 1",
+                comment = "sed",
+                totalPrice = 2036,
+                totalWeight = 4.5,
+                itemsIds = listOf(),
+                orderStatus = OrderStatus.NEW_ORDER,
+                createdAt = 6257
+            ),
+            Order(
+                id = "utinam",
+                clientName = "Jeremiah Cline 2",
+                contact = "curabitur  2",
+                comment = "sed",
+                totalPrice = 2036,
+                totalWeight = 4.5,
+                itemsIds = listOf(),
+                orderStatus = OrderStatus.NEW_ORDER,
+                createdAt = 6257
+            ),
+            Order(
+                id = "utinam",
+                clientName = "Jeremiah Cline 3",
+                contact = "curabitur 3",
+                comment = "sed",
+                totalPrice = 2036,
+                totalWeight = 4.5,
+                itemsIds = listOf(),
+                orderStatus = OrderStatus.NEW_ORDER,
+                createdAt = 6257
+            ),
+
+            Order(
+                id = "utinam",
+                clientName = "Jeremiah Cline 3",
+                contact = "curabitur 3",
+                comment = "sed",
+                totalPrice = 2036,
+                totalWeight = 4.5,
+                itemsIds = listOf(),
+                orderStatus = OrderStatus.DELIVERED,
+                createdAt = 6257
+            ),
+        )
+    )
 
     val inventoryCategoriesFlow = inventoryCategories.asStateFlow()
     val inventoryItemsFlow = inventoryItems.asStateFlow()

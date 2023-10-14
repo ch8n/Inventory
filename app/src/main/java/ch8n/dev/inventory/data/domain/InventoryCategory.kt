@@ -93,6 +93,7 @@ enum class OrderStatus {
 }
 
 data class Order(
+    val id: String = UUID.randomUUID().toString(),
     val clientName: String,
     val contact: String,
     val comment: String,

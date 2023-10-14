@@ -17,6 +17,7 @@ import ch8n.dev.inventory.data.usecase.DeleteInventoryItem
 import ch8n.dev.inventory.data.usecase.GetInventoryCategory
 import ch8n.dev.inventory.data.usecase.GetInventoryItem
 import ch8n.dev.inventory.data.usecase.GetInventorySupplier
+import ch8n.dev.inventory.data.usecase.GetOrders
 import ch8n.dev.inventory.data.usecase.UpdateInventoryCategory
 import ch8n.dev.inventory.data.usecase.UpdateInventoryItem
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,6 +43,7 @@ class AppStore(
     val getCategory: GetInventoryCategory = GetInventoryCategory(),
     val getSupplier: GetInventorySupplier = GetInventorySupplier(),
     val getItems: GetInventoryItem = GetInventoryItem(),
+    val getOrders: GetOrders = GetOrders(),
     val createCategory: CreateInventoryCategory = CreateInventoryCategory(),
     val createSuppliers: CreateInventorySuppliers = CreateInventorySuppliers(),
     val updateCategory: UpdateInventoryCategory = UpdateInventoryCategory(),
