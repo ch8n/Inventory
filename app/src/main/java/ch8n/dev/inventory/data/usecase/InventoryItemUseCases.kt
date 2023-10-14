@@ -20,7 +20,10 @@ class GetInventoryItem(
     ): Flow<List<InventoryItem>> {
         return value.map { items ->
             items
-                .filter { it.category == selectedCategory }
+                .filter {
+                    if (selectedCategory == InventoryCategory.Empty) return@filter true
+                    return@filter it.category.name.equals(selectedCategory.name)
+                }
                 .filter {
                     if (searchQuery.isNotEmpty()) {
                         return@filter it.name.contains(searchQuery, ignoreCase = true)
