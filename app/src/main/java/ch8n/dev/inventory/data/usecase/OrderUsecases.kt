@@ -60,3 +60,30 @@ class CreateOrder(
         database.addNewOrder(order)
     }
 }
+
+class UpdateOrder(
+    private val database: InMemoryDB = InMemoryDB,
+) {
+    fun execute(
+        currentOrder: Order,
+        clientName: String = currentOrder.clientName,
+        contact: String = currentOrder.contact,
+        comment: String = currentOrder.comment,
+        totalPrice: Int = currentOrder.totalPrice,
+        totalWeight: Double = currentOrder.totalWeight,
+        itemsIds: List<ItemOrder> = currentOrder.itemsIds,
+        orderStatus: OrderStatus = currentOrder.orderStatus,
+    ) {
+        val order = currentOrder.copy(
+            clientName = clientName,
+            comment = comment,
+            totalPrice = totalPrice,
+            totalWeight = totalWeight,
+            itemsIds = itemsIds,
+            contact = contact,
+            orderStatus = orderStatus
+        )
+        database.updateNewOrder(order)
+    }
+}
+

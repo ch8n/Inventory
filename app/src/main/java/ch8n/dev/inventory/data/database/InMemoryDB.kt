@@ -184,4 +184,10 @@ object InMemoryDB {
             current + order
         }
     }
+
+    fun updateNewOrder(order: Order) {
+        orders.update { current ->
+            current.filter { it.id != order.id } + order
+        }
+    }
 }

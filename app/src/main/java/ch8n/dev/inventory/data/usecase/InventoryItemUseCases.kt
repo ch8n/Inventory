@@ -14,6 +14,10 @@ class GetInventoryItem(
 ) {
     val value = database.inventoryItemsFlow
 
+    fun getOne(id:String): InventoryItem? {
+        return value.value.find { it.id == id }
+    }
+
     fun filter(
         searchQuery: String,
         selectedCategory: InventoryCategory

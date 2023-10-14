@@ -458,7 +458,7 @@ fun CreateOrderScreen() {
             item {
                 OutlinedButton(
                     onClick = {
-                        store.creatOrder.execute(
+                        store.createOrder.execute(
                             clientName = clientName,
                             contact = clientContact,
                             comment = orderComment,

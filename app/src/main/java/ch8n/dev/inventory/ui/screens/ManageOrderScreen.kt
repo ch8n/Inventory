@@ -2,6 +2,7 @@ package ch8n.dev.inventory.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
+import ch8n.dev.inventory.Destinations
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
@@ -103,6 +105,9 @@ fun ManageOrderScreen() {
                         .fillMaxWidth()
                         .border(2.sdp, Color.DarkGray)
                         .padding(8.sdp)
+                        .clickable {
+                            navigator.goto(Destinations.UpdateOrdersScreen(order = order))
+                        }
                 ) {
                     Text(text = order.clientName)
                     Text(text = "Contact : ${order.contact}")
