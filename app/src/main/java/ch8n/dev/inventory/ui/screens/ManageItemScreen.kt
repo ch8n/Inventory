@@ -68,7 +68,7 @@ import kotlinx.coroutines.launch
     ExperimentalMaterialApi::class
 )
 @Composable
-fun CreateItemScreen() {
+fun ManageItemScreen() {
 
     val navigator = LocalNavigator.current
     val store = LocalAppStore.current
@@ -428,6 +428,10 @@ fun CreateItemScreen() {
                     scope.launch {
                         bottomSheetState.hide()
                     }
+                },
+                onDelete = { item ->
+                    store.deleteItem.execute(item.id)
+                    navigator.back()
                 }
             )
         }
@@ -535,7 +539,8 @@ fun BottomSheet(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun SearchItemBottomSheetContent(
-    onSelect: (item: InventoryItem) -> Unit
+    onSelect: (item: InventoryItem) -> Unit,
+    onDelete: (item: InventoryItem) -> Unit,
 ) {
 
     val store = LocalAppStore.current
@@ -543,7 +548,6 @@ fun SearchItemBottomSheetContent(
     var selectedCategory by rememberMutableState(init = InventoryCategory.Empty)
     val items by store.getItems.filter(searchQuery, selectedCategory)
         .collectAsState(initial = emptyList())
-
 
     Column(
         modifier = Modifier
@@ -662,17 +666,33 @@ fun SearchItemBottomSheetContent(
                         }
                     }
 
-                    OutlinedButton(
-                        onClick = {
-                            onSelect.invoke(item)
-                        },
-                        modifier = Modifier.align(Alignment.End)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
                     ) {
-                        Text(
-                            text = "Select Item",
-                            fontSize = 14.ssp
-                        )
+                        OutlinedButton(
+                            onClick = {
+                                onDelete.invoke(item)
+                            },
+                        ) {
+                            Text(
+                                text = "Delete Item",
+                                fontSize = 14.ssp
+                            )
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                onSelect.invoke(item)
+                            },
+                        ) {
+                            Text(
+                                text = "Select Item",
+                                fontSize = 14.ssp
+                            )
+                        }
                     }
+
                 }
             }
         }
@@ -684,7 +704,7 @@ fun SearchItemBottomSheetContent(
 fun OptionDropDown(
     title: String,
     dropdownOptions: List<String>,
-    onSelected: (selectedIndex: Int) -> Unit
+    onSelected: (selectedIndex: Int) -> Unit,
 ) {
     var popupMenuOpen by remember { mutableStateOf(false) }
     val onPopUpDismissed = remember { { popupMenuOpen = false } }

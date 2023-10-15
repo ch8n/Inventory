@@ -71,11 +71,11 @@ fun HomeScreen() {
             item {
                 OutlinedButton(
                     onClick = {
-                        navigator.goto(Destinations.CreateItemScreen)
+                        navigator.goto(Destinations.ManageItemScreen)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "+ Create/Update Item")
+                    Text(text = "+ Manage Inventory Item")
                 }
             }
 

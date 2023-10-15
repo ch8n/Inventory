@@ -12,7 +12,7 @@ import ch8n.dev.inventory.ui.WithAppStore
 import ch8n.dev.inventory.ui.WithNavigator
 import ch8n.dev.inventory.ui.screens.CreateCategoryScreen
 import ch8n.dev.inventory.ui.screens.HomeScreen
-import ch8n.dev.inventory.ui.screens.CreateItemScreen
+import ch8n.dev.inventory.ui.screens.ManageItemScreen
 import ch8n.dev.inventory.ui.screens.CreateSupplierScreen
 import ch8n.dev.inventory.ui.screens.CreateOrderScreen
 import ch8n.dev.inventory.ui.screens.ManageOrderScreen
@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                         when (currentDestination) {
                             is Destinations.CreateCategoryScreen -> CreateCategoryScreen()
                             is Destinations.HomeScreen, null -> HomeScreen()
-                            is Destinations.CreateItemScreen -> CreateItemScreen()
+                            is Destinations.ManageItemScreen -> ManageItemScreen()
                             is Destinations.CreateOrderScreen -> CreateOrderScreen()
                             is Destinations.CreateSupplierScreen -> CreateSupplierScreen()
                             is Destinations.ManageOrdersScreen -> ManageOrderScreen()
@@ -56,7 +56,7 @@ sealed class Destinations {
     object HomeScreen : Destinations()
     object CreateCategoryScreen : Destinations()
     object CreateSupplierScreen : Destinations()
-    object CreateItemScreen : Destinations()
+    object ManageItemScreen : Destinations()
     object CreateOrderScreen : Destinations()
     object ManageOrdersScreen : Destinations()
     data class UpdateOrdersScreen(val order: Order) : Destinations()
