@@ -10,7 +10,7 @@ import ch8n.dev.inventory.data.domain.Order
 import ch8n.dev.inventory.ui.LocalNavigator
 import ch8n.dev.inventory.ui.WithAppStore
 import ch8n.dev.inventory.ui.WithNavigator
-import ch8n.dev.inventory.ui.screens.CreateCategoryScreen
+import ch8n.dev.inventory.ui.screens.ManageCategoryScreen
 import ch8n.dev.inventory.ui.screens.HomeScreen
 import ch8n.dev.inventory.ui.screens.ManageItemScreen
 import ch8n.dev.inventory.ui.screens.ManageSupplierScreen
@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
                             .collectAsState(initial = Destinations.HomeScreen)
 
                         when (currentDestination) {
-                            is Destinations.CreateCategoryScreen -> CreateCategoryScreen()
+                            is Destinations.CreateCategoryScreen -> ManageCategoryScreen()
                             is Destinations.HomeScreen, null -> HomeScreen()
                             is Destinations.ManageItemScreen -> ManageItemScreen()
                             is Destinations.CreateOrderScreen -> CreateOrderScreen()

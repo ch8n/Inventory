@@ -150,11 +150,7 @@ object InMemoryDB {
     }
 
     fun addInventoryCategory(category: InventoryCategory) {
-        val current = inventoryCategories.value
-        val found = current.find { it.name.equals(category.name, ignoreCase = true) }
-        if (found != null) {
-            inventoryCategories.update { it + category }
-        }
+        inventoryCategories.update { it + category }
     }
 
     fun editInventoryCategory(category: InventoryCategory) {
@@ -163,9 +159,9 @@ object InMemoryDB {
         }
     }
 
-    fun deleteInventoryCategory(categoryName: String) {
+    fun deleteInventoryCategory(categoryId: String) {
         inventoryCategories.update { current ->
-            current.filter { it.name != categoryName }
+            current.filter { it.id != categoryId }
         }
     }
 

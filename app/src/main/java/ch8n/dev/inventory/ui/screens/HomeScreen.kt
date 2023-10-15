@@ -64,7 +64,7 @@ fun HomeScreen() {
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "+ Create Category")
+                    Text(text = "+ Manage Category")
                 }
             }
 

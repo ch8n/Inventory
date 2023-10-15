@@ -26,13 +26,8 @@ class CreateInventoryCategory(
     private val database: InMemoryDB = InMemoryDB,
 ) {
     fun execute(
-        name: String,
-        sizes: List<String>
+        category : InventoryCategory
     ) {
-        val category = InventoryCategory(
-            name = name,
-            sizes = sizes
-        )
         database.addInventoryCategory(category)
     }
 }
