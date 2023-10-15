@@ -196,16 +196,16 @@ fun ManageItemScreen() {
 
                     item {
                         val supplier by store.getSupplier
-                            .value.collectAsState(initial = ComposeStable(emptyList()))
+                            .value.collectAsState(initial = emptyList())
 
-                        val dropdownOptions = supplier.value.map { it.name }
+                        val dropdownOptions = supplier.map { it.name }
 
                         OptionDropDown(
                             title = "Select Supplier",
                             dropdownOptions = dropdownOptions,
                             onSelected = { index ->
                                 selectedItem = selectedItem.copy(
-                                    supplier = supplier.value.get(index)
+                                    supplier = supplier.get(index)
                                 )
                             }
                         )

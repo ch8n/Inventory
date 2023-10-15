@@ -10,6 +10,7 @@ import ch8n.dev.inventory.data.usecase.CreateInventorySuppliers
 import ch8n.dev.inventory.data.usecase.CreateOrder
 import ch8n.dev.inventory.data.usecase.DeleteInventoryCategory
 import ch8n.dev.inventory.data.usecase.DeleteInventoryItem
+import ch8n.dev.inventory.data.usecase.DeleteInventorySupplier
 import ch8n.dev.inventory.data.usecase.GetInventoryCategory
 import ch8n.dev.inventory.data.usecase.GetInventoryItem
 import ch8n.dev.inventory.data.usecase.GetInventorySupplier
@@ -28,8 +29,9 @@ fun WithAppStore(content: @Composable () -> Unit) {
 }
 
 class AppStore(
-    val getCategory: GetInventoryCategory = GetInventoryCategory(),
     val getSupplier: GetInventorySupplier = GetInventorySupplier(),
+    val deleteSupplier: DeleteInventorySupplier = DeleteInventorySupplier(),
+    val getCategory: GetInventoryCategory = GetInventoryCategory(),
     val getItems: GetInventoryItem = GetInventoryItem(),
     val getOrders: GetOrders = GetOrders(),
     val createCategory: CreateInventoryCategory = CreateInventoryCategory(),

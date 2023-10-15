@@ -137,9 +137,15 @@ object InMemoryDB {
     val inventorySupplierFlow = inventorySupplier.asStateFlow()
     val ordersFlow = orders.asStateFlow()
 
-    fun addSuppliers(suppliers: List<InventorySupplier>) {
+    fun addSupplier(supplier: InventorySupplier) {
         inventorySupplier.update { current ->
-            (current + suppliers).distinctBy { it.name }
+            (current + supplier).distinctBy { it.name.lowercase() }
+        }
+    }
+
+    fun deleteSupplier(supplier: InventorySupplier) {
+        inventorySupplier.update { current ->
+            current.filter { it.id != supplier.id }
         }
     }
 

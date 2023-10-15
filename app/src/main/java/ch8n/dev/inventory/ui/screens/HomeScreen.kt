@@ -49,11 +49,11 @@ fun HomeScreen() {
             item {
                 OutlinedButton(
                     onClick = {
-                        navigator.goto(Destinations.CreateSupplierScreen)
+                        navigator.goto(Destinations.ManageSupplierScreen)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "+ Create Suppliers")
+                    Text(text = "+ Manage Suppliers")
                 }
             }
 

@@ -1,10 +1,8 @@
 package ch8n.dev.inventory.data.usecase
 
-import ch8n.dev.inventory.ComposeStable
 import ch8n.dev.inventory.data.database.InMemoryDB
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventorySupplier
-import kotlinx.coroutines.flow.map
 
 
 class GetInventoryCategory(
@@ -18,12 +16,9 @@ class CreateInventorySuppliers(
     private val database: InMemoryDB = InMemoryDB,
 ) {
     fun execute(
-        suppliers: List<String>
+        supplier: String
     ) {
-        val suppliers = suppliers.map { name ->
-            InventorySupplier(name = name)
-        }
-        database.addSuppliers(suppliers)
+        database.addSupplier(InventorySupplier(name = supplier))
     }
 }
 
