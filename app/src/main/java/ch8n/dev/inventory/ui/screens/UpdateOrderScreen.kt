@@ -143,7 +143,7 @@ fun UpdateOrderScreen(order: Order) {
 
             OptionDropDown(
                 title = "Order Status ${orderStatus.name}",
-                dropdownOptions = ComposeStable(orderStatuses.map { it.name }),
+                dropdownOptions = orderStatuses.map { it.name },
                 onSelected = { index ->
                     orderStatus = orderStatuses.get(index)
                 }

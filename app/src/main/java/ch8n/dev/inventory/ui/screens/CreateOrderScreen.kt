@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import ch8n.dev.inventory.ComposeStable
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.data.usecase.ItemOrder
@@ -121,17 +120,13 @@ fun CreateOrderScreen() {
 
                     item {
                         val categories by store.getCategory
-                            .value.collectAsState(initial = ComposeStable(emptyList()))
-
-                        val dropdownOptions = remember(categories.value) {
-                            categories.value.map { it.name }.toList().let { ComposeStable(it) }
-                        }
+                            .value.collectAsState(initial = emptyList())
 
                         OptionDropDown(
                             title = "Select Category",
-                            dropdownOptions = dropdownOptions,
+                            dropdownOptions = categories.map { it.name },
                             onSelected = { index ->
-                                selectedCategory = categories.value.get(index)
+                                selectedCategory = categories.get(index)
                             }
                         )
 
@@ -335,7 +330,7 @@ fun CreateOrderScreen() {
 
                 OptionDropDown(
                     title = "Order Status ${selectedOrderStatus.name}",
-                    dropdownOptions = ComposeStable(orderStatus.map { it.name }),
+                    dropdownOptions = orderStatus.map { it.name },
                     onSelected = { index ->
                         selectedOrderStatus = orderStatus.get(index)
                     }

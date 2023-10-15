@@ -163,13 +163,9 @@ object InMemoryDB {
         }
     }
 
-    fun addInventoryItem(item: InventoryItem) {
-        inventoryItems.update { it + item }
-    }
-
-    fun editInventoryItem(updated: InventoryItem) {
+    fun upsertInventoryItem(item: InventoryItem) {
         inventoryItems.update { current ->
-            current.filter { it.id != updated.id } + updated
+            current.filter { it.id != item.id } + item
         }
     }
 

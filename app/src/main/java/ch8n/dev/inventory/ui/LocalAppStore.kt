@@ -5,7 +5,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import ch8n.dev.inventory.data.usecase.CreateInventoryCategory
-import ch8n.dev.inventory.data.usecase.CreateInventoryItem
+import ch8n.dev.inventory.data.usecase.UpsertInventoryItem
 import ch8n.dev.inventory.data.usecase.CreateInventorySuppliers
 import ch8n.dev.inventory.data.usecase.CreateOrder
 import ch8n.dev.inventory.data.usecase.DeleteInventoryCategory
@@ -15,7 +15,6 @@ import ch8n.dev.inventory.data.usecase.GetInventoryItem
 import ch8n.dev.inventory.data.usecase.GetInventorySupplier
 import ch8n.dev.inventory.data.usecase.GetOrders
 import ch8n.dev.inventory.data.usecase.UpdateInventoryCategory
-import ch8n.dev.inventory.data.usecase.UpdateInventoryItem
 
 val LocalAppStore = compositionLocalOf<AppStore> { error("AppStore not created!") }
 
@@ -37,12 +36,8 @@ class AppStore(
     val createSuppliers: CreateInventorySuppliers = CreateInventorySuppliers(),
     val updateCategory: UpdateInventoryCategory = UpdateInventoryCategory(),
     val deleteCategory: DeleteInventoryCategory = DeleteInventoryCategory(),
-    val createItem: CreateInventoryItem = CreateInventoryItem(),
+    val upsertItem: UpsertInventoryItem = UpsertInventoryItem(),
     val createOrder: CreateOrder = CreateOrder(),
     val updateOrder: CreateOrder = CreateOrder(),
-    val updateItem: UpdateInventoryItem = UpdateInventoryItem(),
     val deleteItem: DeleteInventoryItem = DeleteInventoryItem(),
-) {
-
-
-}
+)

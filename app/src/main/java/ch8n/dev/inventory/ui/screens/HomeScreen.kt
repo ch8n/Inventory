@@ -75,7 +75,7 @@ fun HomeScreen() {
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "+ Create Item")
+                    Text(text = "+ Create/Update Item")
                 }
             }
 

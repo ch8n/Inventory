@@ -10,9 +10,7 @@ import kotlinx.coroutines.flow.map
 class GetInventoryCategory(
     private val database: InMemoryDB = InMemoryDB,
 ) {
-    val value = database.inventoryCategoriesFlow.map {
-        ComposeStable(it)
-    }
+    val value = database.inventoryCategoriesFlow
 }
 
 

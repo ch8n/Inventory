@@ -4,7 +4,7 @@ import ch8n.dev.inventory.data.usecase.ItemOrder
 import java.util.UUID
 
 data class InventoryItem(
-    val id: String,
+    val id: String = UUID.randomUUID().toString(),
     val name: String,
     val images: List<String>,
     val category: InventoryCategory,
@@ -17,6 +17,21 @@ data class InventoryItem(
     val itemColor: String,
 ) {
     companion object {
+
+        val New
+            get() = InventoryItem(
+                name = "",
+                images = listOf(),
+                category = InventoryCategory.Empty,
+                supplier = InventorySupplier.Empty,
+                sellingPrice = 0,
+                purchasePrice = 0,
+                itemQuantity = 0,
+                weight = 0.0,
+                itemSize = "",
+                itemColor = "",
+            )
+
         val Empty = InventoryItem(
             id = "",
             name = "",
