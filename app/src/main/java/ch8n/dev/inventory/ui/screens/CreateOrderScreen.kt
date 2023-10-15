@@ -68,8 +68,8 @@ fun CreateOrderScreen() {
     var shortlistItem by rememberMutableState(init = mapOf<String, Int>())
     var selectedOrderStatus by rememberMutableState<OrderStatus>(init = OrderStatus.NEW_ORDER)
 
-    BottomSheetSelectedOrders(
-        content = { bottomSheet ->
+    BottomSheet(
+        backgroundContent = { bottomSheet ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -501,31 +501,4 @@ fun RowSummaryText(
             fontSize = 16.ssp
         )
     }
-}
-
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun BottomSheetSelectedOrders(
-    sheetState: ModalBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    ),
-    content: @Composable (sheetState: ModalBottomSheetState) -> Unit,
-    sheetContent: @Composable ColumnScope.(sheetState: ModalBottomSheetState) -> Unit,
-) {
-
-    ModalBottomSheetLayout(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(),
-        sheetState = sheetState,
-        sheetShape = RoundedCornerShape(topStart = 16.sdp, topEnd = 16.sdp),
-        sheetContent = {
-            sheetContent(sheetState)
-        },
-        content = {
-            content.invoke(sheetState)
-        }
-    )
 }
