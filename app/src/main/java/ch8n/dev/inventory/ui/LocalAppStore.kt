@@ -16,6 +16,7 @@ import ch8n.dev.inventory.data.usecase.GetInventoryItem
 import ch8n.dev.inventory.data.usecase.GetInventorySupplier
 import ch8n.dev.inventory.data.usecase.GetOrders
 import ch8n.dev.inventory.data.usecase.UpdateInventoryCategory
+import ch8n.dev.inventory.data.usecase.UploadItemImageToServer
 
 val LocalAppStore = compositionLocalOf<AppStore> { error("AppStore not created!") }
 
@@ -34,6 +35,7 @@ class AppStore(
     val getCategory: GetInventoryCategory = GetInventoryCategory(),
     val createCategory: CreateInventoryCategory = CreateInventoryCategory(),
     val deleteCategory: DeleteInventoryCategory = DeleteInventoryCategory(),
+    val uploadImage: UploadItemImageToServer = UploadItemImageToServer(),
 
     val getItems: GetInventoryItem = GetInventoryItem(),
     val getOrders: GetOrders = GetOrders(),

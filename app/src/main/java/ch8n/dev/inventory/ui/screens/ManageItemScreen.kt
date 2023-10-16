@@ -1,5 +1,12 @@
 package ch8n.dev.inventory.ui.screens
 
+import android.app.Activity
+import android.graphics.Bitmap
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,8 +57,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import ch8n.dev.inventory.ComposeStable
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.InventorySupplier
@@ -60,6 +67,8 @@ import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
 import ch8n.dev.inventory.ui.LocalAppStore
 import ch8n.dev.inventory.ui.LocalNavigator
+import com.github.drjacky.imagepicker.ImagePicker
+import com.github.drjacky.imagepicker.constant.ImageProvider
 import kotlinx.coroutines.launch
 
 
@@ -73,7 +82,8 @@ fun ManageItemScreen() {
     val navigator = LocalNavigator.current
     val store = LocalAppStore.current
     val scope = rememberCoroutineScope()
-
+    val context = LocalContext.current
+    val activity = remember(context) { context as AppCompatActivity }
     val categories by store.getCategory.value.collectAsState(initial = emptyList())
     var selectedItem by rememberMutableState(init = InventoryItem.New)
 
@@ -146,11 +156,49 @@ fun ManageItemScreen() {
                     }
 
                     item {
-                        ImageItemUI(
-                            images = ComposeStable(selectedItem.images),
-                            onImagesUpdated = { images ->
-                                selectedItem = selectedItem.copy(images = images)
+
+                        val activityCallbackForImage = rememberLauncherForActivityResult(
+                            contract = ActivityResultContracts.StartActivityForResult(),
+                            onResult = { result ->
+                                val resultCode = result.resultCode
+                                val data = result.data
+
+                                if (resultCode == Activity.RESULT_OK) {
+                                    val fileUri = data?.data
+                                    if (fileUri != null) {
+                                        store.uploadImage.execute(fileUri)
+                                    }
+                                } else if (resultCode == ImagePicker.RESULT_ERROR) {
+                                    Toast.makeText(
+                                        context,
+                                        ImagePicker.getError(data),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    Toast.makeText(context, "Image Cancelled", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
                             }
+                        )
+
+                        ImageItemUI(
+                            images = selectedItem.images,
+                            onSelectImage = { index ->
+
+                            },
+                            onDeleteImage = { index ->
+
+                            },
+                            onSelectNewImage = {
+                                val intent = ImagePicker.with(activity)
+                                    .provider(ImageProvider.BOTH)
+                                    .cropSquare()
+                                    .maxResultSize(width = 512, height = 512, keepRatio = true)
+                                    .setOutputFormat(Bitmap.CompressFormat.WEBP)
+                                    .createIntent()
+
+                                activityCallbackForImage.launch(intent)
+                            },
                         )
                     }
 
@@ -443,8 +491,10 @@ fun ManageItemScreen() {
 
 @Composable
 fun ImageItemUI(
-    images: ComposeStable<List<String>>,
-    onImagesUpdated: (images: List<String>) -> Unit,
+    images: List<String>,
+    onSelectNewImage: () -> Unit,
+    onSelectImage: (index: Int) -> Unit,
+    onDeleteImage: (index: Int) -> Unit,
 ) {
 
     Column(
@@ -473,9 +523,11 @@ fun ImageItemUI(
                 ) {
                     IconButton(
                         onClick = {
-                            onImagesUpdated.invoke(images.value)
+                            onSelectNewImage.invoke()
                         },
-                        modifier = Modifier.align(Alignment.Center),
+                        modifier = Modifier
+                            .size(48.sdp)
+                            .align(Alignment.Center),
                     ) {
                         Column(
                             modifier = Modifier.fillMaxWidth()
@@ -487,7 +539,7 @@ fun ImageItemUI(
                 }
             }
 
-            items(images.value) { attribute ->
+            items(images) { attribute ->
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 8.sdp)
