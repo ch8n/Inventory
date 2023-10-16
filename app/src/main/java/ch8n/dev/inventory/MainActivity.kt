@@ -8,6 +8,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.Order
 import ch8n.dev.inventory.ui.LocalNavigator
 import ch8n.dev.inventory.ui.WithUseCaseProvider
@@ -21,6 +22,7 @@ import ch8n.dev.inventory.ui.screens.ManageOrderContent
 import ch8n.dev.inventory.ui.screens.ManageSupplierContent
 import ch8n.dev.inventory.ui.screens.UpdateOrderContent
 import ch8n.dev.inventory.ui.theme.InventoryTheme
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainActivity : ComponentActivity() {
 
@@ -79,9 +81,18 @@ object ManageSupplierScreen : Screen() {
 }
 
 object ManageItemScreen : Screen() {
+
+    private val selectedItem = MutableStateFlow(InventoryItem.New)
+
     @Composable
     override fun Content() {
-        ManageItemContent()
+        val selectedItem by selectedItem.collectAsState()
+        ManageItemContent(
+            selectedItem = selectedItem,
+            onUpdateSelectedItem = { updated ->
+                this.selectedItem.tryEmit(updated)
+            }
+        )
     }
 }
 

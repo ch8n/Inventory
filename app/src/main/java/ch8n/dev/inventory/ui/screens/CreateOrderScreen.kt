@@ -49,11 +49,11 @@ import kotlinx.coroutines.launch
 fun CreateOrderContent() {
 
     val scope = rememberCoroutineScope()
-    val store = LocalUseCaseProvider.current
+    val userCaseProvider = LocalUseCaseProvider.current
     val navigator = LocalNavigator.current
     var searchQuery by rememberMutableState(init = "")
     var selectedCategory by rememberMutableState(init = InventoryCategory.Empty)
-    val items by store.getItems.filter(searchQuery, selectedCategory)
+    val items by userCaseProvider.getItems.filter(searchQuery, selectedCategory)
         .collectAsState(initial = emptyList())
     var shortlistItem by rememberMutableState(init = mapOf<String, Int>())
     var selectedOrderStatus by rememberMutableState<OrderStatus>(init = OrderStatus.NEW_ORDER)
@@ -328,7 +328,7 @@ fun CreateOrderContent() {
                 item {
                     OutlinedButton(
                         onClick = {
-                            store.createOrder.execute(
+                            userCaseProvider.createOrder.execute(
                                 clientName = clientName,
                                 contact = clientContact,
                                 comment = orderComment,

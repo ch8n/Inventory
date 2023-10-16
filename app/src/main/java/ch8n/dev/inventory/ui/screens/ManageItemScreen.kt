@@ -87,40 +87,47 @@ import ch8n.dev.inventory.*
     ExperimentalMaterialApi::class
 )
 @Composable
-fun ManageItemContent() {
+fun ManageItemContent(
+    selectedItem: InventoryItem,
+    onUpdateSelectedItem: (updated: InventoryItem) -> Unit,
+) {
 
     val navigator = LocalNavigator.current
-    val store = LocalUseCaseProvider.current
+    val userCaseProvider = LocalUseCaseProvider.current
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val categories by userCaseProvider.getCategory.value.collectAsState(initial = emptyList())
 
-    val categories by store.getCategory.value.collectAsState(initial = emptyList())
-    var selectedItem by rememberMutableState(init = InventoryItem.New)
-
-    var purchasePrice by rememberMutableState(init = "")
-    var sellingPrice by rememberMutableState(init = "")
-    var weight by rememberMutableState(init = "")
+    var purchasePrice by rememberMutableState(init = selectedItem.purchasePrice.toString())
+    var sellingPrice by rememberMutableState(init = selectedItem.sellingPrice.toString())
+    var weight by rememberMutableState(init = selectedItem.weight.toString())
 
     LaunchedEffect(weight) {
         if (weight.toDoubleOrNull() != null) {
-            selectedItem = selectedItem.copy(
-                weight = weight.toDouble()
+            onUpdateSelectedItem.invoke(
+                selectedItem.copy(
+                    weight = weight.toDouble()
+                )
             )
         }
     }
 
     LaunchedEffect(sellingPrice) {
         if (sellingPrice.toIntOrNull() != null) {
-            selectedItem = selectedItem.copy(
-                sellingPrice = sellingPrice.toInt()
+            onUpdateSelectedItem.invoke(
+                selectedItem.copy(
+                    sellingPrice = sellingPrice.toInt()
+                )
             )
         }
     }
 
     LaunchedEffect(purchasePrice) {
         if (purchasePrice.toIntOrNull() != null) {
-            selectedItem = selectedItem.copy(
-                purchasePrice = purchasePrice.toInt()
+            onUpdateSelectedItem.invoke(
+                selectedItem.copy(
+                    purchasePrice = purchasePrice.toInt()
+                )
             )
         }
     }
@@ -155,7 +162,9 @@ fun ManageItemContent() {
                         OutlinedTextField(
                             value = selectedItem.name,
                             onValueChange = {
-                                selectedItem = selectedItem.copy(name = it)
+                                onUpdateSelectedItem.invoke(
+                                    selectedItem.copy(name = it)
+                                )
                             },
                             label = { Text(text = "Item Name") },
                             modifier = Modifier.fillMaxWidth(),
@@ -170,8 +179,10 @@ fun ManageItemContent() {
                         val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
                             contract = ActivityResultContracts.PickVisualMedia(),
                             onResult = { uri ->
-                                selectedItem = selectedItem.copy(
-                                    images = listOfNotNull(uri?.toString())
+                                onUpdateSelectedItem.invoke(
+                                    selectedItem.copy(
+                                        images = listOfNotNull(uri?.toString())
+                                    )
                                 )
                             }
                         )
@@ -185,8 +196,10 @@ fun ManageItemContent() {
                                         "ch8n",
                                         "ch8n singleCameraShotLauncher -> ${result.data?.extras?.keySet()}"
                                     )
-                                    selectedItem = selectedItem.copy(
-                                        images = listOfNotNull(cameraUri?.toString())
+                                    onUpdateSelectedItem.invoke(
+                                        selectedItem.copy(
+                                            images = listOfNotNull(cameraUri?.toString())
+                                        )
                                     )
                                 } else {
                                     cameraUri = null
@@ -233,8 +246,10 @@ fun ManageItemContent() {
                             title = "Select Category",
                             dropdownOptions = categories.map { it.name },
                             onSelected = { index ->
-                                selectedItem = selectedItem.copy(
-                                    category = categories.get(index)
+                                onUpdateSelectedItem.invoke(
+                                    selectedItem.copy(
+                                        category = categories.get(index)
+                                    )
                                 )
                             }
                         )
@@ -253,8 +268,10 @@ fun ManageItemContent() {
                                 ),
                                 trailingIcon = {
                                     IconButton(onClick = {
-                                        selectedItem = selectedItem.copy(
-                                            category = InventoryCategory.Empty
+                                        onUpdateSelectedItem.invoke(
+                                            selectedItem.copy(
+                                                category = InventoryCategory.Empty
+                                            )
                                         )
                                     }) {
                                         Icon(
@@ -268,7 +285,7 @@ fun ManageItemContent() {
                     }
 
                     item {
-                        val supplier by store.getSupplier
+                        val supplier by userCaseProvider.getSupplier
                             .value.collectAsState(initial = emptyList())
 
                         val dropdownOptions = supplier.map { it.name }
@@ -277,8 +294,10 @@ fun ManageItemContent() {
                             title = "Select Supplier",
                             dropdownOptions = dropdownOptions,
                             onSelected = { index ->
-                                selectedItem = selectedItem.copy(
-                                    supplier = supplier.get(index)
+                                onUpdateSelectedItem.invoke(
+                                    selectedItem.copy(
+                                        supplier = supplier.get(index)
+                                    )
                                 )
                             }
                         )
@@ -294,8 +313,10 @@ fun ManageItemContent() {
                                 readOnly = true,
                                 trailingIcon = {
                                     IconButton(onClick = {
-                                        selectedItem = selectedItem.copy(
-                                            supplier = InventorySupplier.Empty
+                                        onUpdateSelectedItem.invoke(
+                                            selectedItem.copy(
+                                                supplier = InventorySupplier.Empty
+                                            )
                                         )
                                     }) {
                                         Icon(
@@ -315,8 +336,10 @@ fun ManageItemContent() {
                         OutlinedTextField(
                             value = selectedItem.itemColor,
                             onValueChange = {
-                                selectedItem = selectedItem.copy(
-                                    itemColor = it
+                                onUpdateSelectedItem.invoke(
+                                    selectedItem.copy(
+                                        itemColor = it
+                                    )
                                 )
                             },
                             label = { Text(text = "Item Color") },
@@ -352,8 +375,10 @@ fun ManageItemContent() {
                             title = "Select Size",
                             dropdownOptions = selectedItem.category.sizes,
                             onSelected = { index ->
-                                selectedItem = selectedItem.copy(
-                                    itemSize = selectedItem.category.sizes.get(index)
+                                onUpdateSelectedItem.invoke(
+                                    selectedItem.copy(
+                                        itemSize = selectedItem.category.sizes.get(index)
+                                    )
                                 )
                             }
                         )
@@ -369,8 +394,8 @@ fun ManageItemContent() {
                                 readOnly = true,
                                 trailingIcon = {
                                     IconButton(onClick = {
-                                        selectedItem = selectedItem.copy(
-                                            itemSize = ""
+                                        onUpdateSelectedItem.invoke(
+                                            selectedItem.copy(itemSize = "")
                                         )
                                     }) {
                                         Icon(
@@ -397,8 +422,10 @@ fun ManageItemContent() {
                         ) {
 
                             IconButton(onClick = {
-                                selectedItem = selectedItem.copy(
-                                    itemQuantity = selectedItem.itemQuantity + 1
+                                onUpdateSelectedItem.invoke(
+                                    selectedItem.copy(
+                                        itemQuantity = selectedItem.itemQuantity + 1
+                                    )
                                 )
                             }) {
                                 Icon(
@@ -414,8 +441,10 @@ fun ManageItemContent() {
                             )
 
                             IconButton(onClick = {
-                                selectedItem = selectedItem.copy(
-                                    itemQuantity = selectedItem.itemQuantity - 1
+                                onUpdateSelectedItem.invoke(
+                                    selectedItem.copy(
+                                        itemQuantity = selectedItem.itemQuantity - 1
+                                    )
                                 )
                             }) {
                                 Icon(
@@ -468,7 +497,7 @@ fun ManageItemContent() {
 
                     OutlinedButton(
                         onClick = {
-                            store.upsertItem.execute(selectedItem)
+                            userCaseProvider.upsertItem.execute(selectedItem)
                             navigator.back()
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -494,7 +523,7 @@ fun ManageItemContent() {
         sheetContent = { bottomSheetState ->
             SearchItemBottomSheetContent(
                 onSelect = { item ->
-                    selectedItem = item
+                    onUpdateSelectedItem.invoke(item)
                     weight = item.weight.toString()
                     purchasePrice = item.purchasePrice.toString()
                     sellingPrice = item.sellingPrice.toString()
@@ -503,7 +532,7 @@ fun ManageItemContent() {
                     }
                 },
                 onDelete = { item ->
-                    store.deleteItem.execute(item.id)
+                    userCaseProvider.deleteItem.execute(item.id)
                     navigator.back()
                 }
             )
