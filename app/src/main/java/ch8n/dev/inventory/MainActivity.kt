@@ -1,5 +1,6 @@
 package ch8n.dev.inventory
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,6 +16,7 @@ import ch8n.dev.inventory.ui.screens.HomeScreen
 import ch8n.dev.inventory.ui.screens.ManageItemScreen
 import ch8n.dev.inventory.ui.screens.ManageSupplierScreen
 import ch8n.dev.inventory.ui.screens.CreateOrderScreen
+import ch8n.dev.inventory.ui.screens.ImagePreviewScreen
 import ch8n.dev.inventory.ui.screens.ManageOrderScreen
 import ch8n.dev.inventory.ui.screens.UpdateOrderScreen
 import ch8n.dev.inventory.ui.theme.InventoryTheme
@@ -42,6 +44,7 @@ class MainActivity : ComponentActivity() {
                             is Destinations.ManageSupplierScreen -> ManageSupplierScreen()
                             is Destinations.ManageOrdersScreen -> ManageOrderScreen()
                             is Destinations.UpdateOrdersScreen -> UpdateOrderScreen(order = (currentDestination as Destinations.UpdateOrdersScreen).order)
+                            is Destinations.ImagePreviewScreen -> ImagePreviewScreen(uri = (currentDestination as Destinations.ImagePreviewScreen).uri)
                         }
                     }
                 }
@@ -60,4 +63,5 @@ sealed class Destinations {
     object CreateOrderScreen : Destinations()
     object ManageOrdersScreen : Destinations()
     data class UpdateOrdersScreen(val order: Order) : Destinations()
+    data class ImagePreviewScreen(val uri: Uri) : Destinations()
 }

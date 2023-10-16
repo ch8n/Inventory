@@ -69,5 +69,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation("androidx.compose.foundation:foundation")
     debugImplementation("androidx.compose.foundation:foundation-layout")
-    implementation("com.github.Drjacky:ImagePicker:2.3.22")
+
+    implementation("io.coil-kt:coil-compose:2.4.0")
 }

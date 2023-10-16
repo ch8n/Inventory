@@ -1,27 +1,32 @@
 package ch8n.dev.inventory.ui.screens
 
 import android.app.Activity
-import android.graphics.Bitmap
-import android.widget.Toast
-import androidx.activity.ComponentActivity
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -32,7 +37,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.rounded.AddCircle
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.rememberModalBottomSheetState
@@ -57,8 +61,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
+import ch8n.dev.inventory.Destinations
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.InventorySupplier
@@ -67,9 +75,10 @@ import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
 import ch8n.dev.inventory.ui.LocalAppStore
 import ch8n.dev.inventory.ui.LocalNavigator
-import com.github.drjacky.imagepicker.ImagePicker
-import com.github.drjacky.imagepicker.constant.ImageProvider
+import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
+import java.io.File
+import java.util.UUID
 
 
 @OptIn(
@@ -83,7 +92,7 @@ fun ManageItemScreen() {
     val store = LocalAppStore.current
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val activity = remember(context) { context as AppCompatActivity }
+
     val categories by store.getCategory.value.collectAsState(initial = emptyList())
     var selectedItem by rememberMutableState(init = InventoryItem.New)
 
@@ -157,48 +166,63 @@ fun ManageItemScreen() {
 
                     item {
 
-                        val activityCallbackForImage = rememberLauncherForActivityResult(
+                        val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
+                            contract = ActivityResultContracts.PickVisualMedia(),
+                            onResult = { uri ->
+                                selectedItem = selectedItem.copy(
+                                    images = listOfNotNull(uri?.toString())
+                                )
+                            }
+                        )
+
+                        var cameraUri by rememberMutableState<Uri?>(init = null)
+                        val singleCameraShotLauncher = rememberLauncherForActivityResult(
                             contract = ActivityResultContracts.StartActivityForResult(),
                             onResult = { result ->
-                                val resultCode = result.resultCode
-                                val data = result.data
-
-                                if (resultCode == Activity.RESULT_OK) {
-                                    val fileUri = data?.data
-                                    if (fileUri != null) {
-                                        store.uploadImage.execute(fileUri)
-                                    }
-                                } else if (resultCode == ImagePicker.RESULT_ERROR) {
-                                    Toast.makeText(
-                                        context,
-                                        ImagePicker.getError(data),
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                if (result.resultCode == Activity.RESULT_OK) {
+                                    Log.d(
+                                        "ch8n",
+                                        "ch8n singleCameraShotLauncher -> ${result.data?.extras?.keySet()}"
+                                    )
+                                    selectedItem = selectedItem.copy(
+                                        images = listOfNotNull(cameraUri?.toString())
+                                    )
                                 } else {
-                                    Toast.makeText(context, "Image Cancelled", Toast.LENGTH_SHORT)
-                                        .show()
+                                    cameraUri = null
                                 }
                             }
                         )
 
                         ImageItemUI(
-                            images = selectedItem.images,
+                            images = selectedItem.images.map { it.toUri() },
                             onSelectImage = { index ->
-
+                                val imageUri = selectedItem.images.get(index)
+                                navigator.goto(Destinations.ImagePreviewScreen(imageUri.toUri()))
                             },
-                            onDeleteImage = { index ->
-
+                            onPickImage = {
+                                singlePhotoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
                             },
-                            onSelectNewImage = {
-                                val intent = ImagePicker.with(activity)
-                                    .provider(ImageProvider.BOTH)
-                                    .cropSquare()
-                                    .maxResultSize(width = 512, height = 512, keepRatio = true)
-                                    .setOutputFormat(Bitmap.CompressFormat.WEBP)
-                                    .createIntent()
+                            onCameraShot = {
+                                fun createImageUri(context: Context): Uri {
+                                    val imageFile = File(
+                                        context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                                        "${UUID.randomUUID()}.jpg"
+                                    )
+                                    return FileProvider.getUriForFile(
+                                        context,
+                                        "ch8n.dev.inventory.fileprovider",
+                                        imageFile
+                                    )
+                                }
 
-                                activityCallbackForImage.launch(intent)
-                            },
+                                val imageUri = createImageUri(context)
+                                cameraUri = imageUri
+                                val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                                singleCameraShotLauncher.launch(takePictureIntent)
+                            }
                         )
                     }
 
@@ -491,10 +515,10 @@ fun ManageItemScreen() {
 
 @Composable
 fun ImageItemUI(
-    images: List<String>,
-    onSelectNewImage: () -> Unit,
+    images: List<Uri>,
+    onPickImage: () -> Unit,
+    onCameraShot: () -> Unit,
     onSelectImage: (index: Int) -> Unit,
-    onDeleteImage: (index: Int) -> Unit,
 ) {
 
     Column(
@@ -514,32 +538,37 @@ fun ImageItemUI(
 
         LazyRow() {
             item {
-                Box(
+
+                Column(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .size(150.sdp)
-                        .border(2.sdp, Color.DarkGray)
-                        .padding(4.sdp)
-                        .border(2.sdp, Color.DarkGray)
+                        .border(2.sdp, Color.DarkGray),
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    IconButton(
-                        onClick = {
-                            onSelectNewImage.invoke()
-                        },
-                        modifier = Modifier
-                            .size(48.sdp)
-                            .align(Alignment.Center),
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(imageVector = Icons.Rounded.AddCircle, contentDescription = null)
-                            Text(text = "Camera")
+                    Row(
+                        Modifier.clickable {
+                            onPickImage.invoke()
                         }
+                    ) {
+                        Icon(imageVector = Icons.Rounded.AddCircle, contentDescription = null)
+                        Text(text = "Pick Image")
+                    }
+
+                    Spacer(modifier = Modifier.size(24.sdp))
+
+                    Row(
+                        Modifier.clickable {
+                            onCameraShot.invoke()
+                        }
+                    ) {
+                        Icon(imageVector = Icons.Rounded.AddCircle, contentDescription = null)
+                        Text(text = "Camera")
                     }
                 }
             }
 
-            items(images) { attribute ->
+            itemsIndexed(images) { index, uri ->
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 8.sdp)
@@ -547,15 +576,16 @@ fun ImageItemUI(
                         .border(2.sdp, Color.DarkGray)
                         .padding(4.sdp)
                         .border(2.sdp, Color.DarkGray)
+                        .clickable {
+                            onSelectImage.invoke(index)
+                        }
                 ) {
-                    IconButton(
-                        onClick = {
-
-                        },
-                        modifier = Modifier.align(Alignment.TopEnd)
-                    ) {
-                        Icon(imageVector = Icons.Rounded.Delete, contentDescription = null)
-                    }
+                    AsyncImage(
+                        model = uri,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.FillBounds
+                    )
                 }
             }
         }
