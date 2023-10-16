@@ -625,6 +625,7 @@ fun SearchItemBottomSheetContent(
     onDelete: (item: InventoryItem) -> Unit,
 ) {
 
+    val navigator = LocalNavigator.current
     val store = LocalAppStore.current
     var searchQuery by rememberMutableState(init = "")
     var selectedCategory by rememberMutableState(init = InventoryCategory.Empty)
@@ -732,11 +733,25 @@ fun SearchItemBottomSheetContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
 
+                        val imageUri = item.images.firstOrNull()?.toUri()
+
                         Box(
                             modifier = Modifier
                                 .size(150.sdp)
                                 .border(2.sdp, Color.DarkGray)
-                        )
+                                .clickable {
+                                    if (imageUri != null) {
+                                        navigator.goto(Destinations.ImagePreviewScreen(uri = imageUri))
+                                    }
+                                }
+                        ) {
+                            AsyncImage(
+                                model = imageUri,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.FillBounds
+                            )
+                        }
 
                         Column {
                             Text(text = item.name)
