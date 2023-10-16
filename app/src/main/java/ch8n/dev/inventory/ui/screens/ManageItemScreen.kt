@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
@@ -52,6 +53,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,6 +61,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -80,6 +83,11 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 import ch8n.dev.inventory.*
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 
 @OptIn(
@@ -90,6 +98,12 @@ import ch8n.dev.inventory.*
 fun ManageItemContent(
     selectedItem: InventoryItem,
     onUpdateSelectedItem: (updated: InventoryItem) -> Unit,
+    searchQuery: String,
+    updateSearchQuery: (updated: String) -> Unit,
+    selectedCategory: InventoryCategory,
+    updateSelectedCategory: (updated: InventoryCategory) -> Unit,
+    initialScrollPosition: Int,
+    onScrollPositionChanged: (position: Int) -> Unit,
 ) {
 
     val navigator = LocalNavigator.current
@@ -534,7 +548,13 @@ fun ManageItemContent(
                 onDelete = { item ->
                     userCaseProvider.deleteItem.execute(item.id)
                     navigator.back()
-                }
+                },
+                searchQuery = searchQuery,
+                updateSearchQuery = updateSearchQuery,
+                selectedCategory = selectedCategory,
+                updateSelectedCategory = updateSelectedCategory,
+                initialScrollPosition = initialScrollPosition,
+                onScrollPositionChanged = onScrollPositionChanged
             )
         }
     )
@@ -658,14 +678,19 @@ fun BottomSheet(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun SearchItemBottomSheetContent(
+    searchQuery: String,
+    updateSearchQuery: (updated: String) -> Unit,
+    selectedCategory: InventoryCategory,
+    updateSelectedCategory: (updated: InventoryCategory) -> Unit,
+    initialScrollPosition: Int,
+    onScrollPositionChanged: (position: Int) -> Unit,
     onSelect: (item: InventoryItem) -> Unit,
     onDelete: (item: InventoryItem) -> Unit,
 ) {
 
     val navigator = LocalNavigator.current
     val store = LocalUseCaseProvider.current
-    var searchQuery by rememberMutableState(init = "")
-    var selectedCategory by rememberMutableState(init = InventoryCategory.Empty)
+    val scope = rememberCoroutineScope()
     val items by store.getItems.filter(searchQuery, selectedCategory)
         .collectAsState(initial = emptyList())
 
@@ -676,11 +701,29 @@ fun SearchItemBottomSheetContent(
             .padding(24.sdp)
     ) {
 
+        val scrollState =
+            rememberLazyListState(initialFirstVisibleItemIndex = initialScrollPosition)
+
+        DisposableEffect(scrollState) {
+            snapshotFlow { scrollState.firstVisibleItemIndex }
+                .debounce(800)
+                .distinctUntilChanged()
+                .onEach { position ->
+                    onScrollPositionChanged.invoke(position)
+                }
+                .launchIn(scope)
+
+            onDispose {
+                scope.cancel()
+            }
+        }
+
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.sdp),
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.9f)
+                .fillMaxHeight(0.9f),
+            state = scrollState
         ) {
             item {
                 Text(
@@ -697,9 +740,7 @@ fun SearchItemBottomSheetContent(
             item {
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = {
-                        searchQuery = it
-                    },
+                    onValueChange = updateSearchQuery,
                     label = { Text(text = "Search Item") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -707,7 +748,7 @@ fun SearchItemBottomSheetContent(
                     ),
                     trailingIcon = {
                         IconButton(onClick = {
-                            searchQuery = ""
+                            updateSearchQuery.invoke("")
                         }) {
                             Icon(
                                 imageVector = Icons.Outlined.Delete,
@@ -725,7 +766,7 @@ fun SearchItemBottomSheetContent(
                     title = "Select Category",
                     dropdownOptions = categories.map { it.name },
                     onSelected = { index ->
-                        selectedCategory = categories.get(index)
+                        updateSelectedCategory.invoke(categories.get(index))
                     }
                 )
 
@@ -743,7 +784,7 @@ fun SearchItemBottomSheetContent(
                         ),
                         trailingIcon = {
                             IconButton(onClick = {
-                                selectedCategory = InventoryCategory.Empty
+                                updateSelectedCategory.invoke(InventoryCategory.Empty)
                             }) {
                                 Icon(
                                     imageVector = Icons.Outlined.Delete,

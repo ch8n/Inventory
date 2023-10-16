@@ -8,8 +8,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.Order
+import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.ui.LocalNavigator
 import ch8n.dev.inventory.ui.WithUseCaseProvider
 import ch8n.dev.inventory.ui.WithNavigator
@@ -83,23 +85,97 @@ object ManageSupplierScreen : Screen() {
 object ManageItemScreen : Screen() {
 
     private val selectedItem = MutableStateFlow(InventoryItem.New)
+    private val searchQuery = MutableStateFlow("")
+    private val selectedCategory = MutableStateFlow(InventoryCategory.Empty)
+    private val scrollPosition = MutableStateFlow(0)
 
     @Composable
     override fun Content() {
         val selectedItem by selectedItem.collectAsState()
+        val searchQuery by searchQuery.collectAsState()
+        val selectedCategory by selectedCategory.collectAsState()
+        val scrollPosition by scrollPosition.collectAsState()
+
         ManageItemContent(
             selectedItem = selectedItem,
             onUpdateSelectedItem = { updated ->
                 this.selectedItem.tryEmit(updated)
-            }
+            },
+            searchQuery = searchQuery,
+            updateSearchQuery = {
+                this.searchQuery.tryEmit(it)
+            },
+            selectedCategory = selectedCategory,
+            updateSelectedCategory = {
+                this.selectedCategory.tryEmit(it)
+            },
+            initialScrollPosition = scrollPosition,
+            onScrollPositionChanged = {
+                this.scrollPosition.tryEmit(it)
+            },
         )
     }
 }
 
 object CreateOrderScreen : Screen() {
+
+
+    private val selectedOrderStatus = MutableStateFlow(OrderStatus.NEW_ORDER)
+    private val searchQuery = MutableStateFlow("")
+    private val selectedCategory = MutableStateFlow(InventoryCategory.Empty)
+    private val scrollPosition = MutableStateFlow(0)
+    private val clientName = MutableStateFlow("")
+    private val clientContact = MutableStateFlow("")
+    private val orderComment = MutableStateFlow("")
+    private val shortlistedItem = MutableStateFlow(mapOf<String, Int>())
+
     @Composable
     override fun Content() {
-        CreateOrderContent()
+
+        val selectedOrderStatus by selectedOrderStatus.collectAsState()
+        val shortlistedItem by shortlistedItem.collectAsState()
+
+        val searchQuery by searchQuery.collectAsState()
+        val selectedCategory by selectedCategory.collectAsState()
+        val scrollPosition by scrollPosition.collectAsState()
+        val clientName by clientName.collectAsState()
+        val clientContact by clientContact.collectAsState()
+        val orderComment by orderComment.collectAsState()
+
+        CreateOrderContent(
+            shortlistedItem = shortlistedItem,
+            updateShortListedItem = {
+                this.shortlistedItem.tryEmit(it)
+            },
+            selectedOrderStatus = selectedOrderStatus,
+            onUpdateOrderStatus = {
+                this.selectedOrderStatus.tryEmit(it)
+            },
+            clientName = clientName,
+            updateClientName = {
+                this.clientName.tryEmit(it)
+            },
+            clientContact = clientContact,
+            updateClientContact = {
+                this.clientContact.tryEmit(it)
+            },
+            orderComment = orderComment,
+            updateOrderComment = {
+                this.orderComment.tryEmit(it)
+            },
+            searchQuery = searchQuery,
+            updateSearchQuery = {
+                this.searchQuery.tryEmit(it)
+            },
+            selectedCategory = selectedCategory,
+            updateSelectedCategory = {
+                this.selectedCategory.tryEmit(it)
+            },
+            initialScrollPosition = scrollPosition,
+            onScrollPositionChanged = {
+                this.scrollPosition.tryEmit(it)
+            },
+        )
     }
 
 }

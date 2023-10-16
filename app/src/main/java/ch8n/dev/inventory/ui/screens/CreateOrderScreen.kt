@@ -1,11 +1,13 @@
 package ch8n.dev.inventory.ui.screens
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,63 +31,81 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.core.net.toUri
+import ch8n.dev.inventory.ImagePreviewScreen
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.data.usecase.ItemOrder
-import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
-import ch8n.dev.inventory.ui.LocalUseCaseProvider
 import ch8n.dev.inventory.ui.LocalNavigator
+import ch8n.dev.inventory.ui.LocalUseCaseProvider
+import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun CreateOrderContent() {
+fun CreateOrderContent(
+    shortlistedItem: Map<String, Int>,
+    updateShortListedItem: (updated: Map<String, Int>) -> Unit,
+    selectedOrderStatus: OrderStatus,
+    onUpdateOrderStatus: (updated: OrderStatus) -> Unit,
+    clientName: String,
+    updateClientName: (String) -> Unit,
+    clientContact: String,
+    updateClientContact: (String) -> Unit,
+    orderComment: String,
+    updateOrderComment: (String) -> Unit,
+    searchQuery: String,
+    updateSearchQuery: (updated: String) -> Unit,
+    selectedCategory: InventoryCategory,
+    updateSelectedCategory: (updated: InventoryCategory) -> Unit,
+    initialScrollPosition: Int,
+    onScrollPositionChanged: (position: Int) -> Unit,
+) {
 
     val scope = rememberCoroutineScope()
     val userCaseProvider = LocalUseCaseProvider.current
     val navigator = LocalNavigator.current
-    var searchQuery by rememberMutableState(init = "")
-    var selectedCategory by rememberMutableState(init = InventoryCategory.Empty)
+
     val items by userCaseProvider.getItems.filter(searchQuery, selectedCategory)
         .collectAsState(initial = emptyList())
-    var shortlistItem by rememberMutableState(init = mapOf<String, Int>())
-    var selectedOrderStatus by rememberMutableState<OrderStatus>(init = OrderStatus.NEW_ORDER)
 
     BottomSheet(
         sheetContent = { bottomSheet ->
             SearchItemBottomSheetContent(
                 onSelect = { item ->
-                    val current = shortlistItem.toMutableMap()
+                    val current = shortlistedItem.toMutableMap()
                     current.put(item.id, 0)
-                    shortlistItem = current
+                    updateShortListedItem.invoke(current)
                     scope.launch {
                         bottomSheet.hide()
                     }
                 },
                 onDelete = { item ->
                     // nothing will happen
-                }
+                },
+                searchQuery = searchQuery,
+                updateSearchQuery = updateSearchQuery,
+                selectedCategory = selectedCategory,
+                updateSelectedCategory = updateSelectedCategory,
+                initialScrollPosition = initialScrollPosition,
+                onScrollPositionChanged = onScrollPositionChanged
             )
         },
         backgroundContent = { bottomSheet ->
 
-            var clientName by rememberMutableState(init = "")
-            var clientContact by rememberMutableState(init = "")
-            var orderComment by rememberMutableState(init = "")
-
-            val totalPrice = shortlistItem.entries.map { (key, value) ->
+            val totalPrice = shortlistedItem.entries.map { (key, value) ->
                 val found = items.find { it.id == key } ?: return@map 0
                 found.sellingPrice * value
             }.sum()
 
-            val totalWeight = shortlistItem.entries.map { (key, value) ->
+            val totalWeight = shortlistedItem.entries.map { (key, value) ->
                 val found = items.find { it.id == key } ?: return@map 0.0
                 found.weight * value
             }.sum()
@@ -114,7 +134,7 @@ fun CreateOrderContent() {
 
                         OutlinedTextField(
                             value = clientName,
-                            onValueChange = { clientName = it },
+                            onValueChange = updateClientName,
                             label = { Text(text = "Client Name") },
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -122,7 +142,7 @@ fun CreateOrderContent() {
                             ),
                             trailingIcon = {
                                 IconButton(onClick = {
-                                    clientName = ""
+                                    updateClientName.invoke("")
                                 }) {
                                     Icon(
                                         imageVector = Icons.Outlined.Clear,
@@ -134,7 +154,7 @@ fun CreateOrderContent() {
 
                         OutlinedTextField(
                             value = clientContact,
-                            onValueChange = { clientContact = it },
+                            onValueChange = updateClientContact,
                             label = { Text(text = "Contact Number") },
                             modifier = Modifier.fillMaxWidth(),
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -142,7 +162,7 @@ fun CreateOrderContent() {
                             ),
                             trailingIcon = {
                                 IconButton(onClick = {
-                                    clientContact = ""
+                                    updateClientContact.invoke("")
                                 }) {
                                     Icon(
                                         imageVector = Icons.Outlined.Clear,
@@ -167,7 +187,7 @@ fun CreateOrderContent() {
                             title = "Order Status ${selectedOrderStatus.name}",
                             dropdownOptions = orderStatus.map { it.name },
                             onSelected = { index ->
-                                selectedOrderStatus = orderStatus.get(index)
+                                onUpdateOrderStatus.invoke(orderStatus.get(index))
                             }
                         )
                     }
@@ -193,7 +213,7 @@ fun CreateOrderContent() {
                     }
                 }
 
-                itemsIndexed(shortlistItem.entries.toList()) { index, (itemId, orderQty) ->
+                itemsIndexed(shortlistedItem.entries.toList()) { index, (itemId, orderQty) ->
                     Column(
                         modifier = Modifier
                             .padding(vertical = 8.sdp)
@@ -212,11 +232,25 @@ fun CreateOrderContent() {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
 
+                                val imageUri = item.images.firstOrNull()?.toUri()
+
                                 Box(
                                     modifier = Modifier
                                         .size(150.sdp)
                                         .border(2.sdp, Color.DarkGray)
-                                )
+                                        .clickable {
+                                            if (imageUri != null) {
+                                                navigator.goto(ImagePreviewScreen(uri = imageUri))
+                                            }
+                                        }
+                                ) {
+                                    AsyncImage(
+                                        model = imageUri,
+                                        contentDescription = null,
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.FillBounds
+                                    )
+                                }
 
                                 Column {
                                     Text(text = item.name)
@@ -225,7 +259,7 @@ fun CreateOrderContent() {
                                     Text(text = "Weight : ${item.weight}")
                                     Text(
                                         text = "Total Quantity : ${
-                                            item.itemQuantity - (shortlistItem.get(
+                                            item.itemQuantity - (shortlistedItem.get(
                                                 item.id
                                             ) ?: 0)
                                         }"
@@ -241,9 +275,9 @@ fun CreateOrderContent() {
                             ) {
                                 OutlinedButton(
                                     onClick = {
-                                        val current = shortlistItem.toMutableMap()
+                                        val current = shortlistedItem.toMutableMap()
                                         current.remove(item.id)
-                                        shortlistItem = current
+                                        updateShortListedItem.invoke(current)
                                     },
                                 ) {
                                     Text(
@@ -259,13 +293,13 @@ fun CreateOrderContent() {
 
                                     IconButton(onClick = {
                                         val updated = orderQty + 1
-                                        val current = shortlistItem.toMutableMap()
+                                        val current = shortlistedItem.toMutableMap()
                                         if (updated > 0) {
                                             current.put(itemId, updated)
                                         } else {
                                             current.remove(itemId)
                                         }
-                                        shortlistItem = current
+                                        updateShortListedItem.invoke(current)
                                     }) {
                                         Icon(
                                             imageVector = Icons.Rounded.KeyboardArrowUp,
@@ -281,13 +315,13 @@ fun CreateOrderContent() {
 
                                     IconButton(onClick = {
                                         val updated = orderQty - 1
-                                        val current = shortlistItem.toMutableMap()
+                                        val current = shortlistedItem.toMutableMap()
                                         if (updated > 0) {
                                             current.put(itemId, updated)
                                         } else {
                                             current.remove(itemId)
                                         }
-                                        shortlistItem = current
+                                        updateShortListedItem.invoke(current)
                                     }) {
                                         Icon(
                                             imageVector = Icons.Rounded.KeyboardArrowDown,
@@ -304,7 +338,7 @@ fun CreateOrderContent() {
                 item {
                     OutlinedTextField(
                         value = orderComment,
-                        onValueChange = { orderComment = it },
+                        onValueChange = updateOrderComment,
                         label = { Text(text = "Any Special Comment/Notes?") },
                         modifier = Modifier
                             .padding(vertical = 16.sdp)
@@ -314,7 +348,7 @@ fun CreateOrderContent() {
                         ),
                         trailingIcon = {
                             IconButton(onClick = {
-                                orderComment = ""
+                                updateOrderComment.invoke("")
                             }) {
                                 Icon(
                                     imageVector = Icons.Outlined.Clear,
@@ -334,7 +368,7 @@ fun CreateOrderContent() {
                                 comment = orderComment,
                                 totalPrice = totalPrice,
                                 totalWeight = totalWeight,
-                                itemsIds = shortlistItem.entries.map { (key, value) ->
+                                itemsIds = shortlistedItem.entries.map { (key, value) ->
                                     ItemOrder(key, value)
                                 },
                                 orderStatus = selectedOrderStatus
