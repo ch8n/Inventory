@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun ManageCategoryScreen() {
+fun ManageCategoryContent() {
 
     val store = LocalAppStore.current
     val navigator = LocalNavigator.current

@@ -8,7 +8,7 @@ import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
 
 @Composable
-fun ImagePreviewScreen(uri: Uri) {
+fun ImagePreviewContent(uri: Uri) {
     AsyncImage(
         model = uri,
         contentDescription = null,

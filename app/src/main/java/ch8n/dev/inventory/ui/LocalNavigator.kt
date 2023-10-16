@@ -7,7 +7,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import ch8n.dev.inventory.Destinations
+import ch8n.dev.inventory.HomeScreen
+import ch8n.dev.inventory.Screen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
@@ -36,12 +37,12 @@ fun WithNavigator(
 
 class Navigator {
 
-    private val _backStack = MutableStateFlow<List<Destinations>>(emptyList())
+    private val _backStack = MutableStateFlow<List<Screen>>(emptyList())
     val backstack = _backStack.asStateFlow()
 
     val currentDestination = backstack.map { it.lastOrNull() }
 
-    fun goto(destination: Destinations) {
+    fun goto(destination: Screen) {
         _backStack.update { current -> current + destination }
     }
 
@@ -52,7 +53,7 @@ class Navigator {
         onGoBack.invoke(current != updated)
     }
 
-    fun backTill(destination: Destinations) {
+    fun backTill(destination: Screen) {
         _backStack.update { current ->
             val index = current.indexOfFirst { it == destination }
             current.take(index)

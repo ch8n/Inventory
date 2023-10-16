@@ -1,5 +1,6 @@
 package ch8n.dev.inventory.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,10 +9,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,8 +34,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
-import ch8n.dev.inventory.Destinations
+import ch8n.dev.inventory.ManageOrdersScreen
+import ch8n.dev.inventory.Screen
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
@@ -44,14 +45,16 @@ import ch8n.dev.inventory.ssp
 import ch8n.dev.inventory.ui.LocalAppStore
 import ch8n.dev.inventory.ui.LocalNavigator
 import kotlinx.coroutines.launch
+import ch8n.dev.inventory.*
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun ManageOrderScreen() {
+fun ManageOrderContent() {
 
     val scope = rememberCoroutineScope()
     val store = LocalAppStore.current
+    val context = LocalContext.current
     val navigator = LocalNavigator.current
 
     val orderStatuses = OrderStatus.values()
@@ -122,7 +125,10 @@ fun ManageOrderScreen() {
                             .border(2.sdp, Color.DarkGray)
                             .padding(8.sdp)
                             .clickable {
-                                navigator.goto(Destinations.UpdateOrdersScreen(order = order))
+                                Toast
+                                    .makeText(context, "TODO", Toast.LENGTH_SHORT)
+                                    .show()
+                                //navigator.goto(ManageOrdersScreen)
                             }
                     ) {
                         Text(text = order.clientName)

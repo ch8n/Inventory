@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun CreateOrderScreen() {
+fun CreateOrderContent() {
 
     val scope = rememberCoroutineScope()
     val store = LocalAppStore.current

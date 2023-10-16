@@ -71,4 +71,14 @@ dependencies {
     debugImplementation("androidx.compose.foundation:foundation-layout")
 
     implementation("io.coil-kt:coil-compose:2.4.0")
+
+    val voyagerVersion = "1.0.0-rc05"
+    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+
+    implementation("cafe.adriel.voyager:voyager-androidx:$voyagerVersion")
+
+
+
 }

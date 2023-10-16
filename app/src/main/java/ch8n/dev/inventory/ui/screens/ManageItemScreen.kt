@@ -66,7 +66,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import ch8n.dev.inventory.Destinations
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.InventorySupplier
@@ -79,6 +78,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
+import ch8n.dev.inventory.*
 
 
 @OptIn(
@@ -86,7 +86,7 @@ import java.util.UUID
     ExperimentalMaterialApi::class
 )
 @Composable
-fun ManageItemScreen() {
+fun ManageItemContent() {
 
     val navigator = LocalNavigator.current
     val store = LocalAppStore.current
@@ -197,7 +197,7 @@ fun ManageItemScreen() {
                             images = selectedItem.images.map { it.toUri() },
                             onSelectImage = { index ->
                                 val imageUri = selectedItem.images.get(index)
-                                navigator.goto(Destinations.ImagePreviewScreen(imageUri.toUri()))
+                                navigator.goto(ImagePreviewScreen(imageUri.toUri()))
                             },
                             onPickImage = {
                                 singlePhotoPickerLauncher.launch(
@@ -741,7 +741,7 @@ fun SearchItemBottomSheetContent(
                                 .border(2.sdp, Color.DarkGray)
                                 .clickable {
                                     if (imageUri != null) {
-                                        navigator.goto(Destinations.ImagePreviewScreen(uri = imageUri))
+                                        navigator.goto(ImagePreviewScreen(uri = imageUri))
                                     }
                                 }
                         ) {

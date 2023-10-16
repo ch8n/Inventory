@@ -30,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import ch8n.dev.inventory.ComposeStable
 import ch8n.dev.inventory.data.domain.Order
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.rememberMutableState
@@ -42,7 +41,7 @@ import ch8n.dev.inventory.ui.LocalNavigator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdateOrderScreen(order: Order) {
+fun UpdateOrderContent(order: Order) {
 
     val scope = rememberCoroutineScope()
     val store = LocalAppStore.current
