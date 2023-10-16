@@ -15,6 +15,7 @@ import ch8n.dev.inventory.data.usecase.GetInventoryCategory
 import ch8n.dev.inventory.data.usecase.GetInventoryItem
 import ch8n.dev.inventory.data.usecase.GetInventorySupplier
 import ch8n.dev.inventory.data.usecase.GetOrders
+import ch8n.dev.inventory.data.usecase.ObserveRemoteInventorySuppliersChange
 import ch8n.dev.inventory.data.usecase.UpdateInventoryCategory
 import ch8n.dev.inventory.data.usecase.UploadItemImageToServer
 
@@ -29,6 +30,7 @@ fun WithUseCaseProvider(content: @Composable () -> Unit) {
 }
 
 class UserCaseProvider(
+    val observeRemoteSuppliersChange: ObserveRemoteInventorySuppliersChange = ObserveRemoteInventorySuppliersChange(),
     val getSupplier: GetInventorySupplier = GetInventorySupplier(),
     val deleteSupplier: DeleteInventorySupplier = DeleteInventorySupplier(),
     val getCategory: GetInventoryCategory = GetInventoryCategory(),

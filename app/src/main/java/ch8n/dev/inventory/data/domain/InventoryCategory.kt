@@ -1,5 +1,6 @@
 package ch8n.dev.inventory.data.domain
 
+import androidx.compose.runtime.Stable
 import ch8n.dev.inventory.data.usecase.ItemOrder
 import java.util.UUID
 
@@ -62,8 +63,10 @@ data class InventoryCategory(
     }
 }
 
+
+@Stable
 data class InventorySupplier(
-    val id: String = UUID.randomUUID().toString(),
+    val id: String,
     val name: String
 ) {
     companion object {

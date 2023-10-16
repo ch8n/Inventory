@@ -13,6 +13,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlin.coroutines.CoroutineContext
 
 
 @Composable
@@ -38,6 +42,12 @@ value class ComposeImmutable<T>(val value: T) {
     operator fun component1(): T = value
 }
 
+
+interface UseCaseScope : CoroutineScope {
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + SupervisorJob()
+
+}
 
 val referenceWidth = 420.dp
 

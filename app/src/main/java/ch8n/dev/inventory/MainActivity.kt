@@ -8,6 +8,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import ch8n.dev.inventory.data.DataModule
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.Order
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        DataModule.Injector.provideAppContext(applicationContext)
         setContent {
             InventoryTheme {
                 WithNavigator {
@@ -76,9 +78,14 @@ object ManageCategoryScreen : Screen() {
 }
 
 object ManageSupplierScreen : Screen() {
+
+
     @Composable
     override fun Content() {
-        ManageSupplierContent()
+
+        ManageSupplierContent(
+
+        )
     }
 }
 
