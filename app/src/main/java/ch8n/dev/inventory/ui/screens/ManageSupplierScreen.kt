@@ -18,27 +18,31 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import ch8n.dev.inventory.data.domain.InventorySupplier
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
 import ch8n.dev.inventory.ui.LocalUseCaseProvider
-import ch8n.dev.inventory.ui.LocalNavigator
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageSupplierContent() {
 
-    val store = LocalUseCaseProvider.current
+    val userCaseProvider = LocalUseCaseProvider.current
 
-    val suppliers by store.getSupplier.value.collectAsState(emptyList())
+    LaunchedEffect(Unit) {
+        userCaseProvider.getSupplier.invalidate()
+    }
+
+    val suppliers by userCaseProvider.getSupplier.local.collectAsState(emptyList())
     var newSupplier by rememberMutableState(init = "")
+
 
     Box(
         modifier = Modifier
@@ -75,7 +79,7 @@ fun ManageSupplierContent() {
                         .padding(bottom = 8.sdp),
                     trailingIcon = {
                         IconButton(onClick = {
-                            store.createSuppliers.execute(newSupplier)
+                            userCaseProvider.createSuppliers.execute(newSupplier)
                             newSupplier = ""
                         }) {
                             Icon(
@@ -106,7 +110,7 @@ fun ManageSupplierContent() {
                         .padding(bottom = 8.sdp),
                     trailingIcon = {
                         IconButton(onClick = {
-                            store.deleteSupplier.execute(supplier)
+                            userCaseProvider.deleteSupplier.execute(supplier)
                         }) {
                             Icon(
                                 imageVector = Icons.Outlined.Delete,

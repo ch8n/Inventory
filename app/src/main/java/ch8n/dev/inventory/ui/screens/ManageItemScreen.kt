@@ -300,7 +300,7 @@ fun ManageItemContent(
 
                     item {
                         val supplier by userCaseProvider.getSupplier
-                            .value.collectAsState(initial = emptyList())
+                            .local.collectAsState(initial = emptyList())
 
                         val dropdownOptions = supplier.map { it.name }
 

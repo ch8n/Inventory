@@ -30,7 +30,7 @@ fun WithUseCaseProvider(content: @Composable () -> Unit) {
 }
 
 class UserCaseProvider(
-    val observeRemoteSuppliersChange: ObserveRemoteInventorySuppliersChange = ObserveRemoteInventorySuppliersChange(),
+    //val observeRemoteSuppliersChange: ObserveRemoteInventorySuppliersChange = ObserveRemoteInventorySuppliersChange(),
     val getSupplier: GetInventorySupplier = GetInventorySupplier(),
     val deleteSupplier: DeleteInventorySupplier = DeleteInventorySupplier(),
     val getCategory: GetInventoryCategory = GetInventoryCategory(),

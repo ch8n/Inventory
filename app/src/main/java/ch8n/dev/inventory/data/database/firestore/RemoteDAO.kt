@@ -38,10 +38,30 @@ class RemoteSupplierDAO {
         }
     }
 
+    suspend fun getAllSuppliers(): List<InventorySupplierFS> {
+        val querySnapShot = suppliersDocumentReference.get().await()
+        val inventorySuppliersFS = querySnapShot.documents.mapNotNull { snapshot ->
+            val supplierName = snapshot.getString("name")
+            if (!supplierName.isNullOrEmpty()) {
+                InventorySupplierFS(
+                    documentReferenceId = snapshot.id,
+                    supplierName = supplierName
+                )
+            } else {
+                null
+            }
+        }
+        return inventorySuppliersFS
+    }
+
     suspend fun createSupplier(supplierName: String): InventorySupplierFS {
         val documentReference =
             suppliersDocumentReference.add(hashMapOf("name" to supplierName)).await()
         return InventorySupplierFS(documentReference.id, supplierName)
+    }
+
+    suspend fun deleteSupplier(supplierId: String) {
+        suppliersDocumentReference.document(supplierId).delete().await()
     }
 
 }
