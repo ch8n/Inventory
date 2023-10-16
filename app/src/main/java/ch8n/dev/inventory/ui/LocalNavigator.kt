@@ -27,17 +27,13 @@ fun WithNavigator(
     }
 
     BackHandler {
-        navigator.back { canGoBack ->
-            if (!canGoBack) {
-                (context as ComponentActivity).finishAndRemoveTask()
-            }
-        }
+        navigator.back()
     }
 }
 
 class Navigator {
 
-    private val _backStack = MutableStateFlow<List<Screen>>(emptyList())
+    private val _backStack = MutableStateFlow<List<Screen>>(listOf(HomeScreen))
     val backstack = _backStack.asStateFlow()
 
     val currentDestination = backstack.map { it.lastOrNull() }
@@ -46,11 +42,8 @@ class Navigator {
         _backStack.update { current -> current + destination }
     }
 
-    fun back(onGoBack: (canGoBack: Boolean) -> Unit = {}) {
-        val current = _backStack.value
+    fun back() {
         _backStack.update { current -> current.dropLast(1) }
-        val updated = _backStack.value
-        onGoBack.invoke(current != updated)
     }
 
     fun backTill(destination: Screen) {

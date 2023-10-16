@@ -38,9 +38,9 @@ class MainActivity : ComponentActivity() {
                             .collectAsState(initial = HomeScreen)
 
                         if (currentDestination == null) {
-                            HomeScreen.Content()
+                            finishAndRemoveTask()
                         } else {
-                            requireNotNull(currentDestination).Content()
+                            currentDestination?.Content()
                         }
                     }
                 }

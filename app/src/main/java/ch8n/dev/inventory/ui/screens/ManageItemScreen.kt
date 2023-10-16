@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -602,6 +603,13 @@ fun BottomSheet(
     backgroundContent: @Composable (sheetState: ModalBottomSheetState) -> Unit,
     sheetContent: @Composable ColumnScope.(sheetState: ModalBottomSheetState) -> Unit,
 ) {
+
+    val scope = rememberCoroutineScope()
+    BackHandler(sheetState.isVisible) {
+        scope.launch {
+            sheetState.hide()
+        }
+    }
 
     ModalBottomSheetLayout(
         modifier = Modifier
