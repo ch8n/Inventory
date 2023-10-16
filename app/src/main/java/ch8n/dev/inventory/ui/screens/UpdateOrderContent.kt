@@ -35,7 +35,7 @@ import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
-import ch8n.dev.inventory.ui.LocalAppStore
+import ch8n.dev.inventory.ui.LocalUseCaseProvider
 import ch8n.dev.inventory.ui.LocalNavigator
 
 
@@ -44,7 +44,7 @@ import ch8n.dev.inventory.ui.LocalNavigator
 fun UpdateOrderContent(order: Order) {
 
     val scope = rememberCoroutineScope()
-    val store = LocalAppStore.current
+    val store = LocalUseCaseProvider.current
     val navigator = LocalNavigator.current
     var clientName by rememberMutableState(init = order.clientName)
     var clientContact by rememberMutableState(init = order.contact)

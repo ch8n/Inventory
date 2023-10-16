@@ -10,7 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import ch8n.dev.inventory.data.domain.Order
 import ch8n.dev.inventory.ui.LocalNavigator
-import ch8n.dev.inventory.ui.WithAppStore
+import ch8n.dev.inventory.ui.WithUseCaseProvider
 import ch8n.dev.inventory.ui.WithNavigator
 import ch8n.dev.inventory.ui.screens.CreateOrderContent
 import ch8n.dev.inventory.ui.screens.HomeContent
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             InventoryTheme {
                 WithNavigator {
-                    WithAppStore {
+                    WithUseCaseProvider {
                         val navigator = LocalNavigator.current
 
                         val currentDestination by navigator

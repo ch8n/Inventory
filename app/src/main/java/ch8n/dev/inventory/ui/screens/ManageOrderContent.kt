@@ -36,16 +36,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
-import ch8n.dev.inventory.ManageOrdersScreen
-import ch8n.dev.inventory.Screen
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
-import ch8n.dev.inventory.ui.LocalAppStore
+import ch8n.dev.inventory.ui.LocalUseCaseProvider
 import ch8n.dev.inventory.ui.LocalNavigator
 import kotlinx.coroutines.launch
-import ch8n.dev.inventory.*
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -53,7 +50,7 @@ import ch8n.dev.inventory.*
 fun ManageOrderContent() {
 
     val scope = rememberCoroutineScope()
-    val store = LocalAppStore.current
+    val store = LocalUseCaseProvider.current
     val context = LocalContext.current
     val navigator = LocalNavigator.current
 

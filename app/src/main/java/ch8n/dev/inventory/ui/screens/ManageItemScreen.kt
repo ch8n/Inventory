@@ -73,7 +73,7 @@ import ch8n.dev.inventory.data.domain.InventorySupplier
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
-import ch8n.dev.inventory.ui.LocalAppStore
+import ch8n.dev.inventory.ui.LocalUseCaseProvider
 import ch8n.dev.inventory.ui.LocalNavigator
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
@@ -90,7 +90,7 @@ import ch8n.dev.inventory.*
 fun ManageItemContent() {
 
     val navigator = LocalNavigator.current
-    val store = LocalAppStore.current
+    val store = LocalUseCaseProvider.current
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -634,7 +634,7 @@ fun SearchItemBottomSheetContent(
 ) {
 
     val navigator = LocalNavigator.current
-    val store = LocalAppStore.current
+    val store = LocalUseCaseProvider.current
     var searchQuery by rememberMutableState(init = "")
     var selectedCategory by rememberMutableState(init = InventoryCategory.Empty)
     val items by store.getItems.filter(searchQuery, selectedCategory)

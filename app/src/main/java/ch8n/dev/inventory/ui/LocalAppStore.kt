@@ -18,18 +18,17 @@ import ch8n.dev.inventory.data.usecase.GetOrders
 import ch8n.dev.inventory.data.usecase.UpdateInventoryCategory
 import ch8n.dev.inventory.data.usecase.UploadItemImageToServer
 
-val LocalAppStore = compositionLocalOf<AppStore> { error("AppStore not created!") }
-
+val LocalUseCaseProvider = compositionLocalOf<UserCaseProvider> { error("AppStore not created!") }
 
 @Composable
-fun WithAppStore(content: @Composable () -> Unit) {
-    val appStore = remember { AppStore() }
-    CompositionLocalProvider(LocalAppStore provides appStore) {
+fun WithUseCaseProvider(content: @Composable () -> Unit) {
+    val userCaseProvider = remember { UserCaseProvider() }
+    CompositionLocalProvider(LocalUseCaseProvider provides userCaseProvider) {
         content.invoke()
     }
 }
 
-class AppStore(
+class UserCaseProvider(
     val getSupplier: GetInventorySupplier = GetInventorySupplier(),
     val deleteSupplier: DeleteInventorySupplier = DeleteInventorySupplier(),
     val getCategory: GetInventoryCategory = GetInventoryCategory(),
