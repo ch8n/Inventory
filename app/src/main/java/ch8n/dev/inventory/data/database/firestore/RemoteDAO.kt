@@ -1,8 +1,10 @@
 package ch8n.dev.inventory.data.database.firestore
 
 import android.util.Log
+import ch8n.dev.inventory.data.domain.InventoryItem
+import ch8n.dev.inventory.data.usecase.toRemote
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.getField
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 
@@ -115,6 +117,84 @@ class RemoteCategoryDAO {
 
     suspend fun deleteCategory(categoryId: String) {
         categoryDocumentReference.document(categoryId).delete().await()
+    }
+
+}
+
+
+class RemoteItemDAO {
+    object Schema {
+        const val INVENTORY_ITEM = "inventory_item"
+    }
+
+    private val remoteDB = Firebase.firestore
+    private val itemDocumentReference = remoteDB.collection(Schema.INVENTORY_ITEM)
+
+    private fun DocumentSnapshot.getStringOrEmpty(key: String): String {
+        return this.getString(key) ?: ""
+    }
+
+    private fun DocumentSnapshot.getIntOrZero(key: String): Int {
+        return this.get(key) as? Int ?: 0
+    }
+
+    private fun DocumentSnapshot.getDoubleOrZero(key: String): Double {
+        return this.getDouble(key) ?: 0.0
+    }
+
+    suspend fun getAllItems(): List<InventoryItemFS> {
+        val querySnapShot = itemDocumentReference.get().await()
+        val inventoryItemsFS = querySnapShot.documents.mapNotNull { snapshot ->
+            InventoryItemFS(
+                documentReferenceId = snapshot.id,
+                itemName = snapshot.getStringOrEmpty("itemName"),
+                itemCategoryDocumentReferenceId = snapshot.getStringOrEmpty("itemCategoryDocumentReferenceId"),
+                itemImage = snapshot.getStringOrEmpty("itemImage"),
+                itemQuantity = snapshot.getIntOrZero("itemQuantity"),
+                itemWeight = snapshot.getDoubleOrZero("itemWeight"),
+                itemSupplierDocumentReferenceId = snapshot.getStringOrEmpty("itemSupplierDocumentReferenceId"),
+                itemSellingPrice = snapshot.getIntOrZero("itemSellingPrice"),
+                itemPurchasePrice = snapshot.getIntOrZero("itemPurchasePrice"),
+                itemSize = snapshot.getStringOrEmpty("itemSize"),
+                itemColor = snapshot.getStringOrEmpty("itemColor"),
+            )
+        }
+        return inventoryItemsFS
+    }
+
+    suspend fun upsertInventoryItem(
+        inventoryItem: InventoryItem
+    ): InventoryItemFS {
+
+        val attributes = hashMapOf(
+            "itemName" to inventoryItem.itemName,
+            "itemCategoryDocumentReferenceId" to inventoryItem.itemCategoryId,
+            "itemImage" to inventoryItem.itemImage,
+            "itemQuantity" to inventoryItem.itemQuantity,
+            "itemWeight" to inventoryItem.itemWeight,
+            "itemSupplierDocumentReferenceId" to inventoryItem.itemSupplierId,
+            "itemSellingPrice" to inventoryItem.itemSellingPrice,
+            "itemPurchasePrice" to inventoryItem.itemPurchasePrice,
+            "itemSize" to inventoryItem.itemSize,
+            "itemColor" to inventoryItem.itemColor,
+        )
+
+        val _documentReferenceId = itemDocumentReference
+            .run {
+                if (inventoryItem.uid.isNotEmpty()) {
+                    document(inventoryItem.uid).set(attributes).await()
+                    inventoryItem.uid
+                } else {
+                    val documentReference = add(attributes).await()
+                    documentReference.id
+                }
+            }
+
+        return inventoryItem.toRemote().copy(documentReferenceId = _documentReferenceId)
+    }
+
+    suspend fun deleteInventoryItem(itemId: String) {
+        itemDocumentReference.document(itemId).delete().await()
     }
 
 }

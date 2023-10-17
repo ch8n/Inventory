@@ -4,16 +4,18 @@ import androidx.compose.runtime.Stable
 import ch8n.dev.inventory.data.usecase.ItemOrder
 import java.util.UUID
 
+
+@Stable
 data class InventoryItem(
-    val id: String = UUID.randomUUID().toString(),
-    val name: String,
-    val images: List<String>,
-    val category: InventoryCategory,
+    val uid: String,
+    val itemName: String,
+    val itemImage: String,
+    val itemCategoryId: String,
     val itemQuantity: Int,
-    val weight: Double,
-    val supplier: InventorySupplier,
-    val sellingPrice: Int,
-    val purchasePrice: Int,
+    val itemWeight: Double,
+    val itemSupplierId: String,
+    val itemSellingPrice: Int,
+    val itemPurchasePrice: Int,
     val itemSize: String,
     val itemColor: String,
 ) {
@@ -21,38 +23,25 @@ data class InventoryItem(
 
         val New
             get() = InventoryItem(
-                name = "",
-                images = listOf(),
-                category = InventoryCategory.Empty,
-                supplier = InventorySupplier.Empty,
-                sellingPrice = 0,
-                purchasePrice = 0,
+                uid = "",
+                itemName = "",
+                itemImage = "",
+                itemCategoryId = "",
+                itemSupplierId = "",
+                itemSellingPrice = 0,
+                itemPurchasePrice = 0,
                 itemQuantity = 0,
-                weight = 0.0,
+                itemWeight = 0.0,
                 itemSize = "",
                 itemColor = "",
             )
-
-        val Empty = InventoryItem(
-            id = "",
-            name = "",
-            images = listOf(),
-            category = InventoryCategory.Empty,
-            supplier = InventorySupplier.Empty,
-            sellingPrice = 0,
-            purchasePrice = 0,
-            itemQuantity = 0,
-            weight = 0.0,
-            itemSize = "",
-            itemColor = "",
-        )
     }
 }
 
 
 @Stable
 data class InventoryCategory(
-    val id:String,
+    val id: String,
     val name: String,
     val sizes: List<String>
 ) {

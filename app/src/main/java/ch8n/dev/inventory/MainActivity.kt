@@ -89,7 +89,7 @@ object ManageSupplierScreen : Screen() {
     }
 }
 
-object ManageItemScreen : Screen() {
+class ManageItemScreen : Screen() {
 
     private val selectedItem = MutableStateFlow(InventoryItem.New)
     private val searchQuery = MutableStateFlow("")

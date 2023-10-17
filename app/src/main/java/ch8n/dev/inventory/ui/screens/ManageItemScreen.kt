@@ -111,16 +111,17 @@ fun ManageItemContent(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val categories by userCaseProvider.getCategory.local.collectAsState(initial = emptyList())
+    val supplier by userCaseProvider.getSupplier.local.collectAsState(initial = emptyList())
 
-    var purchasePrice by rememberMutableState(init = selectedItem.purchasePrice.toString())
-    var sellingPrice by rememberMutableState(init = selectedItem.sellingPrice.toString())
-    var weight by rememberMutableState(init = selectedItem.weight.toString())
+    var purchasePrice by rememberMutableState(init = selectedItem.itemPurchasePrice.toString())
+    var sellingPrice by rememberMutableState(init = selectedItem.itemSellingPrice.toString())
+    var weight by rememberMutableState(init = selectedItem.itemWeight.toString())
 
     LaunchedEffect(weight) {
         if (weight.toDoubleOrNull() != null) {
             onUpdateSelectedItem.invoke(
                 selectedItem.copy(
-                    weight = weight.toDouble()
+                    itemWeight = weight.toDouble()
                 )
             )
         }
@@ -130,7 +131,7 @@ fun ManageItemContent(
         if (sellingPrice.toIntOrNull() != null) {
             onUpdateSelectedItem.invoke(
                 selectedItem.copy(
-                    sellingPrice = sellingPrice.toInt()
+                    itemSellingPrice = sellingPrice.toInt()
                 )
             )
         }
@@ -140,7 +141,7 @@ fun ManageItemContent(
         if (purchasePrice.toIntOrNull() != null) {
             onUpdateSelectedItem.invoke(
                 selectedItem.copy(
-                    purchasePrice = purchasePrice.toInt()
+                    itemPurchasePrice = purchasePrice.toInt()
                 )
             )
         }
@@ -152,6 +153,7 @@ fun ManageItemContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
+                    .background(Color.White)
                     .padding(24.sdp)
             ) {
 
@@ -174,10 +176,10 @@ fun ManageItemContent(
 
                     item {
                         OutlinedTextField(
-                            value = selectedItem.name,
+                            value = selectedItem.itemName,
                             onValueChange = {
                                 onUpdateSelectedItem.invoke(
-                                    selectedItem.copy(name = it)
+                                    selectedItem.copy(itemName = it)
                                 )
                             },
                             label = { Text(text = "Item Name") },
@@ -195,7 +197,7 @@ fun ManageItemContent(
                             onResult = { uri ->
                                 onUpdateSelectedItem.invoke(
                                     selectedItem.copy(
-                                        images = listOfNotNull(uri?.toString())
+                                        itemImage = uri?.toString() ?: ""
                                     )
                                 )
                             }
@@ -212,7 +214,7 @@ fun ManageItemContent(
                                     )
                                     onUpdateSelectedItem.invoke(
                                         selectedItem.copy(
-                                            images = listOfNotNull(cameraUri?.toString())
+                                            itemImage = cameraUri?.toString() ?: ""
                                         )
                                     )
                                 } else {
@@ -222,9 +224,9 @@ fun ManageItemContent(
                         )
 
                         ImageItemUI(
-                            images = selectedItem.images.map { it.toUri() },
-                            onSelectImage = { index ->
-                                val imageUri = selectedItem.images.get(index)
+                            image = selectedItem.itemImage.toUri(),
+                            onImageClicked = {
+                                val imageUri = selectedItem.itemImage
                                 navigator.goto(ImagePreviewScreen(imageUri.toUri()))
                             },
                             onPickImage = {
@@ -255,22 +257,22 @@ fun ManageItemContent(
                     }
 
                     item {
-
                         OptionDropDown(
                             title = "Select Category",
                             dropdownOptions = categories.map { it.name },
                             onSelected = { index ->
                                 onUpdateSelectedItem.invoke(
                                     selectedItem.copy(
-                                        category = categories.get(index)
+                                        itemCategoryId = categories.get(index).id
                                     )
                                 )
                             }
                         )
 
-                        AnimatedVisibility(visible = selectedItem.category != InventoryCategory.Empty) {
+                        AnimatedVisibility(visible = selectedItem.itemCategoryId.isNotEmpty()) {
                             OutlinedTextField(
-                                value = selectedItem.category.name,
+                                value = categories.find { it.id == selectedItem.itemCategoryId }?.name
+                                    ?: "",
                                 onValueChange = {},
                                 label = { Text(text = "Option Selected") },
                                 modifier = Modifier
@@ -284,7 +286,7 @@ fun ManageItemContent(
                                     IconButton(onClick = {
                                         onUpdateSelectedItem.invoke(
                                             selectedItem.copy(
-                                                category = InventoryCategory.Empty
+                                                itemCategoryId = ""
                                             )
                                         )
                                     }) {
@@ -299,8 +301,6 @@ fun ManageItemContent(
                     }
 
                     item {
-                        val supplier by userCaseProvider.getSupplier
-                            .local.collectAsState(initial = emptyList())
 
                         val dropdownOptions = supplier.map { it.name }
 
@@ -310,15 +310,16 @@ fun ManageItemContent(
                             onSelected = { index ->
                                 onUpdateSelectedItem.invoke(
                                     selectedItem.copy(
-                                        supplier = supplier.get(index)
+                                        itemSupplierId = supplier.get(index).id
                                     )
                                 )
                             }
                         )
 
-                        AnimatedVisibility(visible = selectedItem.supplier != InventorySupplier.Empty) {
+                        AnimatedVisibility(visible = selectedItem.itemSupplierId.isNotEmpty()) {
                             OutlinedTextField(
-                                value = selectedItem.supplier.name,
+                                value = supplier.find { it.id == selectedItem.itemSupplierId }?.name
+                                    ?: "",
                                 onValueChange = {},
                                 label = { Text(text = "Option Selected") },
                                 modifier = Modifier
@@ -329,7 +330,7 @@ fun ManageItemContent(
                                     IconButton(onClick = {
                                         onUpdateSelectedItem.invoke(
                                             selectedItem.copy(
-                                                supplier = InventorySupplier.Empty
+                                                itemSupplierId = ""
                                             )
                                         )
                                     }) {
@@ -385,13 +386,19 @@ fun ManageItemContent(
 
                     item {
 
+                        val sizes = remember(selectedItem.itemCategoryId) {
+                            categories.find {
+                                it.id == selectedItem.itemCategoryId
+                            }?.sizes ?: emptyList()
+                        }
+
                         OptionDropDown(
                             title = "Select Size",
-                            dropdownOptions = selectedItem.category.sizes,
+                            dropdownOptions = sizes,
                             onSelected = { index ->
                                 onUpdateSelectedItem.invoke(
                                     selectedItem.copy(
-                                        itemSize = selectedItem.category.sizes.get(index)
+                                        itemSize = sizes.get(index)
                                     )
                                 )
                             }
@@ -424,7 +431,6 @@ fun ManageItemContent(
                             )
                         }
                     }
-
 
                     item {
 
@@ -487,7 +493,6 @@ fun ManageItemContent(
 
                     item {
 
-
                         OutlinedTextField(
                             value = sellingPrice,
                             onValueChange = {
@@ -503,16 +508,37 @@ fun ManageItemContent(
                         )
                     }
 
+                    item {
+                        Box(modifier = Modifier.size(150.sdp))
+                    }
+
                 }
 
                 Column(
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .align(Alignment.BottomCenter)
                 ) {
 
                     OutlinedButton(
                         onClick = {
-                            userCaseProvider.upsertItem.execute(selectedItem)
-                            navigator.back()
+                            val isValid = with(selectedItem) {
+                                itemName.isNotEmpty()
+                                        && itemImage.isNotEmpty()
+                                        && itemCategoryId.isNotEmpty()
+                                        && this.itemSupplierId.isNotEmpty()
+                                        && itemColor.isNotEmpty()
+                                        && this.itemWeight > 0.0
+                                        && this.itemSize.isNotEmpty()
+                                        && this.itemPurchasePrice > 0
+                                        && this.itemSellingPrice > 0
+                            }
+                            if (isValid) {
+                                userCaseProvider.upsertItem.execute(selectedItem)
+                                navigator.back()
+                            }
+
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -538,15 +564,15 @@ fun ManageItemContent(
             SearchItemBottomSheetContent(
                 onSelect = { item ->
                     onUpdateSelectedItem.invoke(item)
-                    weight = item.weight.toString()
-                    purchasePrice = item.purchasePrice.toString()
-                    sellingPrice = item.sellingPrice.toString()
+                    weight = item.itemWeight.toString()
+                    purchasePrice = item.itemPurchasePrice.toString()
+                    sellingPrice = item.itemSellingPrice.toString()
                     scope.launch {
                         bottomSheetState.hide()
                     }
                 },
                 onDelete = { item ->
-                    userCaseProvider.deleteItem.execute(item.id)
+                    userCaseProvider.deleteItem.execute(item.uid)
                     navigator.back()
                 },
                 searchQuery = searchQuery,
@@ -565,10 +591,10 @@ fun ManageItemContent(
 
 @Composable
 fun ImageItemUI(
-    images: List<Uri>,
+    image: Uri,
     onPickImage: () -> Unit,
     onCameraShot: () -> Unit,
-    onSelectImage: (index: Int) -> Unit,
+    onImageClicked: () -> Unit,
 ) {
 
     Column(
@@ -618,7 +644,7 @@ fun ImageItemUI(
                 }
             }
 
-            itemsIndexed(images) { index, uri ->
+            item {
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 8.sdp)
@@ -627,11 +653,11 @@ fun ImageItemUI(
                         .padding(4.sdp)
                         .border(2.sdp, Color.DarkGray)
                         .clickable {
-                            onSelectImage.invoke(index)
+                            onImageClicked.invoke()
                         }
                 ) {
                     AsyncImage(
-                        model = uri,
+                        model = image,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.FillBounds
@@ -691,6 +717,7 @@ fun SearchItemBottomSheetContent(
     val navigator = LocalNavigator.current
     val store = LocalUseCaseProvider.current
     val scope = rememberCoroutineScope()
+    val categories by store.getCategory.local.collectAsState(initial = emptyList())
     val items by store.getItems.filter(searchQuery, selectedCategory)
         .collectAsState(initial = emptyList())
 
@@ -760,7 +787,7 @@ fun SearchItemBottomSheetContent(
             }
 
             item {
-                val categories by store.getCategory.local.collectAsState(initial = emptyList())
+
 
                 OptionDropDown(
                     title = "Select Category",
@@ -811,16 +838,14 @@ fun SearchItemBottomSheetContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
 
-                        val imageUri = item.images.firstOrNull()?.toUri()
+                        val imageUri = item.itemImage.toUri()
 
                         Box(
                             modifier = Modifier
                                 .size(150.sdp)
                                 .border(2.sdp, Color.DarkGray)
                                 .clickable {
-                                    if (imageUri != null) {
-                                        navigator.goto(ImagePreviewScreen(uri = imageUri))
-                                    }
+                                    navigator.goto(ImagePreviewScreen(uri = imageUri))
                                 }
                         ) {
                             AsyncImage(
@@ -832,12 +857,12 @@ fun SearchItemBottomSheetContent(
                         }
 
                         Column {
-                            Text(text = item.name)
+                            Text(text = item.itemName)
                             Text(text = "Color : ${item.itemColor}")
                             Text(text = "Size : ${item.itemSize}")
-                            Text(text = "Weight : ${item.weight}")
+                            Text(text = "Weight : ${item.itemWeight}")
                             Text(text = "Total Quantity : ${item.itemQuantity}")
-                            Text(text = "Selling : ${item.sellingPrice}")
+                            Text(text = "Selling : ${item.itemSellingPrice}")
                         }
                     }
 

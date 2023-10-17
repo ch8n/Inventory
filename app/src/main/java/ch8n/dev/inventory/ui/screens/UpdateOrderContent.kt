@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.Order
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.rememberMutableState
@@ -157,7 +158,8 @@ fun UpdateOrderContent(order: Order) {
                     .padding(8.sdp)
             ) {
 
-                val item = remember(itemOrder) { store.getItems.getOne(itemOrder.itemId) }
+                //val item = remember(itemOrder) { store.getItems.getOne(itemOrder.itemId) }
+                val item: InventoryItem? = null
 
                 if (item != null) {
 
@@ -174,11 +176,11 @@ fun UpdateOrderContent(order: Order) {
                         )
 
                         Column {
-                            Text(text = item.name)
+                            Text(text = item.itemName)
                             Text(text = "Color : ${item.itemColor}")
                             Text(text = "Size : ${item.itemSize}")
-                            Text(text = "Weight : ${item.weight}")
-                            Text(text = "Selling : ${item.sellingPrice}")
+                            Text(text = "Weight : ${item.itemWeight}")
+                            Text(text = "Selling : ${item.itemSellingPrice}")
                             Text(text = "Order Qty : ${itemOrder.orderQty}")
                         }
                     }

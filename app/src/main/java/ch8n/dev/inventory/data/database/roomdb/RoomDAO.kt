@@ -40,3 +40,16 @@ interface LocalCategoryDAO : RoomDAO<InventoryCategoryEntity> {
     @Query("SELECT * FROM InventoryCategoryEntity WHERE category_name LIKE :name LIMIT 1")
     fun findByName(name: String): InventoryCategoryEntity?
 }
+
+
+@Dao
+interface LocalItemDAO : RoomDAO<InventoryItemEntity> {
+    @Query("SELECT * FROM InventoryItemEntity")
+    fun getAll(): Flow<List<InventoryItemEntity>>
+
+    @Query("SELECT * FROM InventoryItemEntity WHERE uid IN (:ids)")
+    fun loadAllByIds(ids: IntArray): List<InventoryItemEntity>
+
+    @Query("SELECT * FROM InventoryItemEntity WHERE item_name LIKE :name LIMIT 1")
+    fun findByName(name: String): InventoryItemEntity?
+}

@@ -81,7 +81,7 @@ fun CreateOrderContent(
             SearchItemBottomSheetContent(
                 onSelect = { item ->
                     val current = shortlistedItem.toMutableMap()
-                    current.put(item.id, 0)
+                    current.put(item.uid, 0)
                     updateShortListedItem.invoke(current)
                     scope.launch {
                         bottomSheet.hide()
@@ -101,13 +101,13 @@ fun CreateOrderContent(
         backgroundContent = { bottomSheet ->
 
             val totalPrice = shortlistedItem.entries.map { (key, value) ->
-                val found = items.find { it.id == key } ?: return@map 0
-                found.sellingPrice * value
+                val found = items.find { it.uid == key } ?: return@map 0
+                found.itemSellingPrice * value
             }.sum()
 
             val totalWeight = shortlistedItem.entries.map { (key, value) ->
-                val found = items.find { it.id == key } ?: return@map 0.0
-                found.weight * value
+                val found = items.find { it.uid == key } ?: return@map 0.0
+                found.itemWeight * value
             }.sum()
 
             LazyColumn(
@@ -222,7 +222,7 @@ fun CreateOrderContent(
                             .padding(8.sdp)
                     ) {
 
-                        val item = remember(itemId) { items.find { it.id == itemId } }
+                        val item = remember(itemId) { items.find { it.uid == itemId } }
 
                         if (item != null) {
 
@@ -232,16 +232,14 @@ fun CreateOrderContent(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
 
-                                val imageUri = item.images.firstOrNull()?.toUri()
+                                val imageUri = item.itemImage.toUri()
 
                                 Box(
                                     modifier = Modifier
                                         .size(150.sdp)
                                         .border(2.sdp, Color.DarkGray)
                                         .clickable {
-                                            if (imageUri != null) {
-                                                navigator.goto(ImagePreviewScreen(uri = imageUri))
-                                            }
+                                            navigator.goto(ImagePreviewScreen(uri = imageUri))
                                         }
                                 ) {
                                     AsyncImage(
@@ -253,18 +251,18 @@ fun CreateOrderContent(
                                 }
 
                                 Column {
-                                    Text(text = item.name)
+                                    Text(text = item.itemName)
                                     Text(text = "Color : ${item.itemColor}")
                                     Text(text = "Size : ${item.itemSize}")
-                                    Text(text = "Weight : ${item.weight}")
+                                    Text(text = "Weight : ${item.itemWeight}")
                                     Text(
                                         text = "Total Quantity : ${
                                             item.itemQuantity - (shortlistedItem.get(
-                                                item.id
+                                                item.uid
                                             ) ?: 0)
                                         }"
                                     )
-                                    Text(text = "Selling : ${item.sellingPrice}")
+                                    Text(text = "Selling : ${item.itemSellingPrice}")
                                 }
                             }
 
@@ -276,7 +274,7 @@ fun CreateOrderContent(
                                 OutlinedButton(
                                     onClick = {
                                         val current = shortlistedItem.toMutableMap()
-                                        current.remove(item.id)
+                                        current.remove(item.uid)
                                         updateShortListedItem.invoke(current)
                                     },
                                 ) {

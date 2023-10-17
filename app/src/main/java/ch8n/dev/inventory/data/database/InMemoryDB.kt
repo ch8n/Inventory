@@ -4,7 +4,6 @@ import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.InventorySupplier
 import ch8n.dev.inventory.data.domain.Order
-import ch8n.dev.inventory.data.domain.OrderStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -51,13 +50,13 @@ object InMemoryDB {
 
     fun upsertInventoryItem(item: InventoryItem) {
         inventoryItems.update { current ->
-            current.filter { it.id != item.id } + item
+            current.filter { it.uid != item.uid } + item
         }
     }
 
     fun deleteInventoryItem(itemId: String) {
         inventoryItems.update { current ->
-            current.filter { it.id != itemId }
+            current.filter { it.uid != itemId }
         }
     }
 
