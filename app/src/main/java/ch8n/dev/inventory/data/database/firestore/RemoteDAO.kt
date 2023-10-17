@@ -144,7 +144,7 @@ class RemoteItemDAO {
 
     suspend fun getAllItems(): List<InventoryItemFS> {
         val querySnapShot = itemDocumentReference.get().await()
-        val inventoryItemsFS = querySnapShot.documents.mapNotNull { snapshot ->
+        val inventoryItemsFS = querySnapShot.documents.map { snapshot ->
             InventoryItemFS(
                 documentReferenceId = snapshot.id,
                 itemName = snapshot.getStringOrEmpty("itemName"),

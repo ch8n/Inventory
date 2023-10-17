@@ -117,6 +117,10 @@ fun ManageItemContent(
     var sellingPrice by rememberMutableState(init = selectedItem.itemSellingPrice.toString())
     var weight by rememberMutableState(init = selectedItem.itemWeight.toString())
 
+    LaunchedEffect(Unit){
+        userCaseProvider.getItems.invalidate()
+    }
+
     LaunchedEffect(weight) {
         if (weight.toDoubleOrNull() != null) {
             onUpdateSelectedItem.invoke(
