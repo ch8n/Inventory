@@ -23,6 +23,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,11 +45,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun ManageCategoryContent() {
 
-    val store = LocalUseCaseProvider.current
-    val navigator = LocalNavigator.current
+    val userCaseProvider = LocalUseCaseProvider.current
     val scope = rememberCoroutineScope()
 
-    val categories by store.getCategory.local.collectAsState(emptyList())
+    val categories by userCaseProvider.getCategory.local.collectAsState(emptyList())
+
+    LaunchedEffect(Unit) {
+        userCaseProvider.getCategory.invalidate()
+    }
 
     BottomSheet(
         backgroundContent = { bottomSheetState ->
@@ -98,7 +102,7 @@ fun ManageCategoryContent() {
                                 .padding(bottom = 8.sdp),
                             trailingIcon = {
                                 IconButton(onClick = {
-                                    store.deleteCategory.execute(category)
+                                    userCaseProvider.deleteCategory.execute(category)
                                 }) {
                                     Icon(
                                         imageVector = Icons.Outlined.Delete,
@@ -144,7 +148,7 @@ fun ManageCategoryContent() {
         sheetContent = { bottomSheetState ->
             CreateCategoryBottomSheetContent(
                 onCreate = { category ->
-                    store.createCategory.execute(category)
+                    userCaseProvider.createCategory.execute(category)
                     scope.launch {
                         bottomSheetState.hide()
                     }
@@ -246,13 +250,15 @@ fun CreateCategoryBottomSheetContent(
         item {
             OutlinedButton(
                 onClick = {
-                    onCreate.invoke(
-                        InventoryCategory(
-                            id = "",
-                            name = categoryName,
-                            sizes = categorySizes
+                    if (categoryName.isNotEmpty() && categorySizes.all { it.isNotEmpty() }) {
+                        onCreate.invoke(
+                            InventoryCategory(
+                                id = "",
+                                name = categoryName,
+                                sizes = categorySizes
+                            )
                         )
-                    )
+                    }
                 },
                 modifier = Modifier
                     .padding(horizontal = 24.sdp, vertical = 16.sdp)

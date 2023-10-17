@@ -80,7 +80,7 @@ class RemoteCategoryDAO {
         val querySnapShot = categoryDocumentReference.get().await()
         val categoriesSuppliersFS = querySnapShot.documents.mapNotNull { snapshot ->
             val categoryName = snapshot.getString("name")
-            val categorySizes = snapshot.getField<List<String>>("sizes") ?: emptyList()
+            val categorySizes = snapshot.get("sizes") as? List<String> ?: emptyList()
 
             if (!categoryName.isNullOrEmpty()) {
                 InventoryCategoryFS(

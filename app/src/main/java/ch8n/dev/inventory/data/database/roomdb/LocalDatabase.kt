@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 
-@Database(entities = [InventorySupplierEntity::class], version = 1)
+@Database(entities = [InventorySupplierEntity::class, InventoryCategoryEntity::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun localSuppliersDAO(): LocalSuppliersDAO
     abstract fun localCategoryDAO(): LocalCategoryDAO
