@@ -49,8 +49,10 @@ data class InventoryItem(
     }
 }
 
+
+@Stable
 data class InventoryCategory(
-    val id: String = UUID.randomUUID().toString(),
+    val id:String,
     val name: String,
     val sizes: List<String>
 ) {
@@ -73,29 +75,6 @@ data class InventorySupplier(
         val Empty = InventorySupplier(
             id = "",
             name = ""
-        )
-    }
-}
-
-data class InventoryItemVariant(
-    val id: String = UUID.randomUUID().toString(),
-    val color: String,
-    val quantity: Int,
-    val size: String,
-) {
-    companion object {
-        val New
-            get() = InventoryItemVariant(
-                color = "",
-                quantity = 0,
-                size = "",
-            )
-
-        val Empty = InventoryItemVariant(
-            id = "",
-            color = "",
-            quantity = 0,
-            size = ""
         )
     }
 }

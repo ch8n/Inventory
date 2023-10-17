@@ -2,6 +2,7 @@ package ch8n.dev.inventory.data.database.firestore
 
 import android.util.Log
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.getField
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 
@@ -62,6 +63,58 @@ class RemoteSupplierDAO {
 
     suspend fun deleteSupplier(supplierId: String) {
         suppliersDocumentReference.document(supplierId).delete().await()
+    }
+
+}
+
+
+class RemoteCategoryDAO {
+    object Schema {
+        const val INVENTORY_CATEGORY = "inventory_category"
+    }
+
+    private val remoteDB = Firebase.firestore
+    private val categoryDocumentReference = remoteDB.collection(Schema.INVENTORY_CATEGORY)
+
+    suspend fun getAllCategory(): List<InventoryCategoryFS> {
+        val querySnapShot = categoryDocumentReference.get().await()
+        val categoriesSuppliersFS = querySnapShot.documents.mapNotNull { snapshot ->
+            val categoryName = snapshot.getString("name")
+            val categorySizes = snapshot.getField<List<String>>("sizes") ?: emptyList()
+
+            if (!categoryName.isNullOrEmpty()) {
+                InventoryCategoryFS(
+                    documentReferenceId = snapshot.id,
+                    categoryName = categoryName,
+                    itemSize = categorySizes
+                )
+            } else {
+                null
+            }
+        }
+        return categoriesSuppliersFS
+    }
+
+    suspend fun createCategory(
+        categoryName: String,
+        sizes: List<String>
+    ): InventoryCategoryFS {
+        val documentReference =
+            categoryDocumentReference.add(
+                hashMapOf(
+                    "name" to categoryName,
+                    "sizes" to sizes
+                )
+            ).await()
+        return InventoryCategoryFS(
+            documentReferenceId = documentReference.id,
+            categoryName = categoryName,
+            itemSize = sizes
+        )
+    }
+
+    suspend fun deleteCategory(categoryId: String) {
+        categoryDocumentReference.document(categoryId).delete().await()
     }
 
 }

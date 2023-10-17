@@ -110,7 +110,7 @@ fun ManageItemContent(
     val userCaseProvider = LocalUseCaseProvider.current
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val categories by userCaseProvider.getCategory.value.collectAsState(initial = emptyList())
+    val categories by userCaseProvider.getCategory.local.collectAsState(initial = emptyList())
 
     var purchasePrice by rememberMutableState(init = selectedItem.purchasePrice.toString())
     var sellingPrice by rememberMutableState(init = selectedItem.sellingPrice.toString())
@@ -760,7 +760,7 @@ fun SearchItemBottomSheetContent(
             }
 
             item {
-                val categories by store.getCategory.value.collectAsState(initial = emptyList())
+                val categories by store.getCategory.local.collectAsState(initial = emptyList())
 
                 OptionDropDown(
                     title = "Select Category",

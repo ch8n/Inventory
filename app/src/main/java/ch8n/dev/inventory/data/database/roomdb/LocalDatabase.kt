@@ -9,6 +9,7 @@ import androidx.room.RoomDatabase
 @Database(entities = [InventorySupplierEntity::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun localSuppliersDAO(): LocalSuppliersDAO
+    abstract fun localCategoryDAO(): LocalCategoryDAO
 
     companion object {
         fun build(context: Context): AppDatabase {

@@ -48,7 +48,7 @@ fun ManageCategoryContent() {
     val navigator = LocalNavigator.current
     val scope = rememberCoroutineScope()
 
-    val categories by store.getCategory.value.collectAsState()
+    val categories by store.getCategory.local.collectAsState(emptyList())
 
     BottomSheet(
         backgroundContent = { bottomSheetState ->
@@ -98,7 +98,7 @@ fun ManageCategoryContent() {
                                 .padding(bottom = 8.sdp),
                             trailingIcon = {
                                 IconButton(onClick = {
-                                    store.deleteCategory.execute(category.id)
+                                    store.deleteCategory.execute(category)
                                 }) {
                                     Icon(
                                         imageVector = Icons.Outlined.Delete,
@@ -248,6 +248,7 @@ fun CreateCategoryBottomSheetContent(
                 onClick = {
                     onCreate.invoke(
                         InventoryCategory(
+                            id = "",
                             name = categoryName,
                             sizes = categorySizes
                         )
