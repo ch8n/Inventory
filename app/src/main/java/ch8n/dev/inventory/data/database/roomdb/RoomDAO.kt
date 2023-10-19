@@ -47,9 +47,13 @@ interface LocalItemDAO : RoomDAO<InventoryItemEntity> {
     @Query("SELECT * FROM InventoryItemEntity")
     fun getAll(): Flow<List<InventoryItemEntity>>
 
+
     @Query("SELECT * FROM InventoryItemEntity WHERE uid IN (:ids)")
     fun loadAllByIds(ids: IntArray): List<InventoryItemEntity>
 
     @Query("SELECT * FROM InventoryItemEntity WHERE item_name LIKE :name LIMIT 1")
     fun findByName(name: String): InventoryItemEntity?
+
+    @Query("SELECT * FROM InventoryItemEntity WHERE uid LIKE :id LIMIT 1")
+    fun findById(id: String): InventoryItemEntity?
 }

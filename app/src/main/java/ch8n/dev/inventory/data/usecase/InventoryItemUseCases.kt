@@ -10,6 +10,7 @@ import ch8n.dev.inventory.data.database.roomdb.LocalItemDAO
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
@@ -129,12 +130,12 @@ class UpsertInventoryItem(
     fun execute(
         item: InventoryItem
     ) {
-        launch {
+        launch(NonCancellable) {
             val remoteItem = remoteItemDAO.upsertInventoryItem(item)
             val entity = remoteItem.toEntity()
             Log.d("ch8n", "UpsertInventoryItem execute: remoteItem $remoteItem ")
-            Log.d("ch8n", "UpsertInventoryItem execute: entity $entity ")
             localItemDAO.insertAll(entity)
+            Log.d("ch8n", "UpsertInventoryItem execute: entity $entity ")
         }
     }
 }
