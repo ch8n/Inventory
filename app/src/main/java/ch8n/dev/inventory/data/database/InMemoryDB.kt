@@ -10,96 +10,30 @@ import kotlinx.coroutines.flow.update
 
 object InMemoryDB {
 
-    private val inventoryCategories = MutableStateFlow<List<InventoryCategory>>(
-        listOf(
-            InventoryCategory(
-                name = "Bangles",
-                sizes = listOf(
-                    "2.2", "2.4", "2.6", "2.8"
-                )
-            ),
-            InventoryCategory(
-                name = "Tangle",
-                sizes = listOf(
-                    "2.2", "2.4", "2.6", "2.8"
-                )
-            )
-        )
-    )
-    private val inventorySupplier = MutableStateFlow<List<InventorySupplier>>(
-        listOf(
-            InventorySupplier(
-                name = "lovely"
-            ),
-            InventorySupplier(
-                name = "Tubly"
-            ),
-        )
-    )
-    private val inventoryItems = MutableStateFlow<List<InventoryItem>>(
-        listOf(
-            InventoryItem(
-                id = "suscipiantur",
-                name = "Dawn Strong",
-                images = listOf(),
-                category = InventoryCategory(
-                    id = "mazim",
-                    name = "Bangles",
-                    sizes = listOf()
-                ),
-                itemQuantity = 20,
-                weight = 6.7,
-                supplier = InventorySupplier(
-                    id = "fusce",
-                    name = "Lovely"
-                ),
-                sellingPrice = 9861,
-                purchasePrice = 9662,
-                itemSize = "2.2",
-                itemColor = "Red"
-            ),
-            InventoryItem(
-                id = "epicuri",
-                name = "Wiley Ryan",
-                images = listOf(),
-                category = InventoryCategory(
-                    id = "montes",
-                    name = "Bangles",
-                    sizes = listOf()
-                ),
-                itemSize = "2.4",
-                itemColor = "Blue",
-                itemQuantity = 4212,
-                weight = 10.11,
-                supplier = InventorySupplier(
-                    id = "his",
-                    name = "Jay Wall"
-                ),
-                sellingPrice = 5741,
-                purchasePrice = 8908
-            )
-        )
-    )
-
-    private val orders = MutableStateFlow(listOf<Order>())
+    private val inventoryCategories = MutableStateFlow<List<InventoryCategory>>(emptyList())
+    private val inventorySupplier = MutableStateFlow<List<InventorySupplier>>(emptyList())
+    private val inventoryItems = MutableStateFlow<List<InventoryItem>>(emptyList())
+    private val orders = MutableStateFlow<List<Order>>(emptyList())
 
     val inventoryCategoriesFlow = inventoryCategories.asStateFlow()
     val inventoryItemsFlow = inventoryItems.asStateFlow()
     val inventorySupplierFlow = inventorySupplier.asStateFlow()
     val ordersFlow = orders.asStateFlow()
 
-    fun addSuppliers(suppliers: List<InventorySupplier>) {
+    fun addSupplier(supplier: InventorySupplier) {
         inventorySupplier.update { current ->
-            (current + suppliers).distinctBy { it.name }
+            (current + supplier).distinctBy { it.name.lowercase() }
+        }
+    }
+
+    fun deleteSupplier(supplier: InventorySupplier) {
+        inventorySupplier.update { current ->
+            current.filter { it.id != supplier.id }
         }
     }
 
     fun addInventoryCategory(category: InventoryCategory) {
-        val current = inventoryCategories.value
-        val found = current.find { it.name.equals(category.name, ignoreCase = true) }
-        if (found != null) {
-            inventoryCategories.update { it + category }
-        }
+        inventoryCategories.update { it + category }
     }
 
     fun editInventoryCategory(category: InventoryCategory) {
@@ -108,31 +42,33 @@ object InMemoryDB {
         }
     }
 
-    fun deleteInventoryCategory(categoryName: String) {
+    fun deleteInventoryCategory(categoryId: String) {
         inventoryCategories.update { current ->
-            current.filter { it.name != categoryName }
+            current.filter { it.id != categoryId }
         }
     }
 
-    fun addInventoryItem(item: InventoryItem) {
-        inventoryItems.update { it + item }
-    }
-
-    fun editInventoryItem(updated: InventoryItem) {
+    fun upsertInventoryItem(item: InventoryItem) {
         inventoryItems.update { current ->
-            current.filter { it.id != updated.id } + updated
+            current.filter { it.uid != item.uid } + item
         }
     }
 
     fun deleteInventoryItem(itemId: String) {
         inventoryItems.update { current ->
-            current.filter { it.id != itemId }
+            current.filter { it.uid != itemId }
         }
     }
 
     fun addNewOrder(order: Order) {
         orders.update { current ->
             current + order
+        }
+    }
+
+    fun updateNewOrder(order: Order) {
+        orders.update { current ->
+            current.filter { it.id != order.id } + order
         }
     }
 }

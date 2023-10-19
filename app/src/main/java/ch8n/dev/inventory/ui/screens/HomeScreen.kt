@@ -12,19 +12,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import ch8n.dev.inventory.Destinations
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
-import ch8n.dev.inventory.ui.LocalAppStore
 import ch8n.dev.inventory.ui.LocalNavigator
+import ch8n.dev.inventory.*
 
 
 @Composable
-fun HomeScreen() {
-
-    val store = LocalAppStore.current
+fun HomeContent() {
     val navigator = LocalNavigator.current
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -49,44 +45,55 @@ fun HomeScreen() {
             item {
                 OutlinedButton(
                     onClick = {
-                        navigator.goto(Destinations.CreateSupplierScreen)
+                        navigator.goto(ManageSupplierScreen)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "+ Create Suppliers")
+                    Text(text = "+ Manage Suppliers")
                 }
             }
 
             item {
                 OutlinedButton(
                     onClick = {
-                        navigator.goto(Destinations.CreateCategoryScreen)
+                        navigator.goto(ManageCategoryScreen)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "+ Create Category")
+                    Text(text = "+ Manage Category")
                 }
             }
 
             item {
                 OutlinedButton(
                     onClick = {
-                        navigator.goto(Destinations.CreateItemScreen)
+                        navigator.goto(ManageItemScreen())
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "+ Create Item")
+                    Text(text = "+ Manage Inventory Item")
                 }
             }
 
             item {
                 OutlinedButton(
                     onClick = {
-                        navigator.goto(Destinations.CreateOrderScreen)
+                        navigator.goto(CreateOrderScreen)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = "+ Create Order")
+                }
+            }
+
+            item {
+                OutlinedButton(
+                    onClick = {
+                        navigator.goto(ManageOrdersScreen)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "+ Manage Order")
                 }
             }
 

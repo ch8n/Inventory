@@ -1,40 +1,47 @@
 package ch8n.dev.inventory.data.domain
 
+import androidx.compose.runtime.Stable
 import ch8n.dev.inventory.data.usecase.ItemOrder
 import java.util.UUID
 
+
+@Stable
 data class InventoryItem(
-    val id: String,
-    val name: String,
-    val images: List<String>,
-    val category: InventoryCategory,
-    val itemQuantity: Int,
-    val weight: Double,
-    val supplier: InventorySupplier,
-    val sellingPrice: Int,
-    val purchasePrice: Int,
+    val uid: String,
+    val itemName: String,
+    val itemImage: String,
+    val itemCategoryId: String,
+    val itemWeight: Double,
+    val itemSupplierId: String,
     val itemSize: String,
     val itemColor: String,
+    val itemQuantity: Int,
+    val itemSellingPrice: Int,
+    val itemPurchasePrice: Int,
 ) {
     companion object {
-        val Empty = InventoryItem(
-            id = "",
-            name = "",
-            images = listOf(),
-            category = InventoryCategory.Empty,
-            supplier = InventorySupplier.Empty,
-            sellingPrice = 0,
-            purchasePrice = 0,
-            itemQuantity = 0,
-            weight = 0.0,
-            itemSize = "",
-            itemColor = "",
-        )
+
+        val New
+            get() = InventoryItem(
+                uid = "",
+                itemName = "",
+                itemImage = "",
+                itemCategoryId = "",
+                itemSupplierId = "",
+                itemSellingPrice = 0,
+                itemPurchasePrice = 0,
+                itemQuantity = 0,
+                itemWeight = 0.0,
+                itemSize = "",
+                itemColor = "",
+            )
     }
 }
 
+
+@Stable
 data class InventoryCategory(
-    val id: String = UUID.randomUUID().toString(),
+    val id: String,
     val name: String,
     val sizes: List<String>
 ) {
@@ -47,8 +54,10 @@ data class InventoryCategory(
     }
 }
 
+
+@Stable
 data class InventorySupplier(
-    val id: String = UUID.randomUUID().toString(),
+    val id: String,
     val name: String
 ) {
     companion object {
@@ -59,35 +68,24 @@ data class InventorySupplier(
     }
 }
 
-data class InventoryItemVariant(
-    val id: String = UUID.randomUUID().toString(),
-    val color: String,
-    val quantity: Int,
-    val size: String,
-) {
-    companion object {
-        val New
-            get() = InventoryItemVariant(
-                color = "",
-                quantity = 0,
-                size = "",
-            )
 
-        val Empty = InventoryItemVariant(
-            id = "",
-            color = "",
-            quantity = 0,
-            size = ""
-        )
-    }
+enum class OrderStatus {
+    NEW_ORDER,
+    PACKING,
+    PACKED,
+    DISPATCHED,
+    DELIVERED,
+    ISSUE
 }
 
 data class Order(
+    val id: String = UUID.randomUUID().toString(),
     val clientName: String,
     val contact: String,
     val comment: String,
     val totalPrice: Int,
     val totalWeight: Double,
     val itemsIds: List<ItemOrder>,
-    val createdAt: Long = System.currentTimeMillis()
+    val orderStatus: OrderStatus,
+    val createdAt: Long = System.currentTimeMillis(),
 )

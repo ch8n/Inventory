@@ -1,71 +1,86 @@
 package ch8n.dev.inventory.data.usecase
 
-import ch8n.dev.inventory.ComposeStable
-import ch8n.dev.inventory.data.database.InMemoryDB
+import ch8n.dev.inventory.UseCaseScope
+import ch8n.dev.inventory.data.DataModule
+import ch8n.dev.inventory.data.database.firestore.InventoryCategoryFS
+import ch8n.dev.inventory.data.database.firestore.RemoteCategoryDAO
+import ch8n.dev.inventory.data.database.roomdb.InventoryCategoryEntity
+import ch8n.dev.inventory.data.database.roomdb.LocalCategoryDAO
 import ch8n.dev.inventory.data.domain.InventoryCategory
-import ch8n.dev.inventory.data.domain.InventorySupplier
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 
-class GetInventoryCategory(
-    private val database: InMemoryDB = InMemoryDB,
-) {
-    val value = database.inventoryCategoriesFlow.map {
-        ComposeStable(it)
-    }
+fun InventoryCategoryFS.toEntity(): InventoryCategoryEntity {
+    return InventoryCategoryEntity(
+        uid = documentReferenceId,
+        categoryName = categoryName,
+        itemSize = itemSize
+    )
 }
 
+fun InventoryCategory.toEntity(): InventoryCategoryEntity {
+    return InventoryCategoryEntity(
+        uid = id,
+        categoryName = name,
+        itemSize = sizes
+    )
+}
 
-class CreateInventorySuppliers(
-    private val database: InMemoryDB = InMemoryDB,
-) {
-    fun execute(
-        suppliers: List<String>
-    ) {
-        val suppliers = suppliers.map { name ->
-            InventorySupplier(name = name)
+fun InventoryCategoryEntity.toView(): InventoryCategory {
+    return InventoryCategory(
+        id = uid,
+        name = categoryName,
+        sizes = itemSize
+    )
+}
+
+class GetInventoryCategory(
+    private val remoteCategoryDAO: RemoteCategoryDAO = DataModule.Injector.remoteDatabase.remoteCategoryDAO,
+    private val localCategoryDAO: LocalCategoryDAO = DataModule.Injector.localDatabase.localCategoryDAO(),
+) : UseCaseScope {
+
+    val local = localCategoryDAO.getAll().map { categories ->
+        categories.map { it.toView() }
+    }.flowOn(Dispatchers.IO)
+
+    fun invalidate() {
+        launch {
+            val remoteCategories = remoteCategoryDAO.getAllCategory()
+            localCategoryDAO.insertAll(*remoteCategories.map { it.toEntity() }.toTypedArray())
         }
-        database.addSuppliers(suppliers)
     }
 }
 
 class CreateInventoryCategory(
-    private val database: InMemoryDB = InMemoryDB,
-) {
+    private val remoteCategoryDAO: RemoteCategoryDAO = DataModule.Injector.remoteDatabase.remoteCategoryDAO,
+    private val localCategoryDAO: LocalCategoryDAO = DataModule.Injector.localDatabase.localCategoryDAO(),
+) : UseCaseScope {
     fun execute(
-        name: String,
-        sizes: List<String>
+        category: InventoryCategory
     ) {
-        val category = InventoryCategory(
-            name = name,
-            sizes = sizes
-        )
-        database.addInventoryCategory(category)
-    }
-}
-
-class UpdateInventoryCategory(
-    private val database: InMemoryDB = InMemoryDB,
-) {
-    fun execute(
-        current: InventoryCategory,
-        name: String = current.name,
-        sizes: List<String> = current.sizes
-    ) {
-        val item = current.copy(
-            name = name,
-            sizes = sizes,
-        )
-        database.editInventoryCategory(item)
+        launch {
+            val remoteCategory = remoteCategoryDAO.createCategory(
+                categoryName = category.name,
+                sizes = category.sizes
+            )
+            localCategoryDAO.insertAll(remoteCategory.toEntity())
+        }
     }
 }
 
 class DeleteInventoryCategory(
-    private val database: InMemoryDB = InMemoryDB,
-) {
+    private val remoteCategoryDAO: RemoteCategoryDAO = DataModule.Injector.remoteDatabase.remoteCategoryDAO,
+    private val localCategoryDAO: LocalCategoryDAO = DataModule.Injector.localDatabase.localCategoryDAO(),
+) : UseCaseScope {
     fun execute(
-        categoryId: String,
+        category: InventoryCategory,
     ) {
-        database.deleteInventoryCategory(categoryId)
+        launch {
+            remoteCategoryDAO.deleteCategory(category.id)
+            localCategoryDAO.delete(category.toEntity())
+        }
     }
 }
