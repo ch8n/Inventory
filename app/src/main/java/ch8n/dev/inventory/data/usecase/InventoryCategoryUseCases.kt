@@ -48,7 +48,7 @@ class GetInventoryCategory(
     }.flowOn(Dispatchers.IO)
 
     fun invalidate() {
-        launch {
+        launch(NonCancellable) {
             val remoteCategories = remoteCategoryDAO.getAllCategory()
             localCategoryDAO.insertAll(*remoteCategories.map { it.toEntity() }.toTypedArray())
         }

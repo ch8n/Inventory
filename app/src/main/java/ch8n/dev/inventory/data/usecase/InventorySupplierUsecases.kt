@@ -89,7 +89,7 @@ class GetInventorySupplier(
     }.flowOn(Dispatchers.IO)
 
     fun invalidate() {
-        launch {
+        launch(NonCancellable) {
             val remoteSuppliers = remoteSupplierDAO.getAllSuppliers()
             Log.d("ch8n", "GetInventorySupplier invalidate called $remoteSuppliers")
             localSuppliersDAO.insertAll(*remoteSuppliers.map { it.toEntity() }.toTypedArray())

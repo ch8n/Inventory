@@ -95,7 +95,7 @@ class GetInventoryItem(
         }
 
     fun invalidate() {
-        launch {
+        launch(NonCancellable) {
             val remoteItems = remoteItemDAO.getAllItems()
             localItemDAO.insertAll(*remoteItems.map { it.toEntity() }.toTypedArray())
         }
