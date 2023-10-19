@@ -2,12 +2,10 @@ package ch8n.dev.inventory.data.database.firestorage
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import androidx.core.net.toFile
 import androidx.core.net.toUri
 import coil.ImageLoader
 import coil.request.ImageRequest
@@ -20,7 +18,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
 
-class FireStorage {
+class RemoteUploadDAO {
 
     private val storage by lazy { Firebase.storage }
     private val imageStoreReference = storage.reference.child("images")
