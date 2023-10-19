@@ -1,8 +1,11 @@
 package ch8n.dev.inventory.data.usecase
 
+import android.content.Context
 import android.util.Log
+import androidx.core.net.toUri
 import ch8n.dev.inventory.UseCaseScope
 import ch8n.dev.inventory.data.DataModule
+import ch8n.dev.inventory.data.database.firestorage.RemoteUploadDAO
 import ch8n.dev.inventory.data.database.firestore.InventoryItemFS
 import ch8n.dev.inventory.data.database.firestore.RemoteItemDAO
 import ch8n.dev.inventory.data.database.roomdb.InventoryItemEntity
@@ -10,6 +13,7 @@ import ch8n.dev.inventory.data.database.roomdb.LocalItemDAO
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
@@ -94,7 +98,7 @@ class GetInventoryItem(
         }
 
     fun invalidate() {
-        launch {
+        launch(NonCancellable) {
             val remoteItems = remoteItemDAO.getAllItems()
             localItemDAO.insertAll(*remoteItems.map { it.toEntity() }.toTypedArray())
         }
@@ -125,15 +129,16 @@ class GetInventoryItem(
 class UpsertInventoryItem(
     private val remoteItemDAO: RemoteItemDAO = DataModule.Injector.remoteDatabase.remoteItemDAO,
     private val localItemDAO: LocalItemDAO = DataModule.Injector.localDatabase.localItemDAO(),
+    private val uploadFileDAO: RemoteUploadDAO = DataModule.Injector.remoteDatabase.remoteUploadDAO,
+    private val applicationContext: Context = DataModule.Injector.appContext,
 ) : UseCaseScope {
     fun execute(
         item: InventoryItem
     ) {
-        launch {
-            val remoteItem = remoteItemDAO.upsertInventoryItem(item)
+        launch(NonCancellable) {
+            val remoteUrl = uploadFileDAO.getImageUrl(applicationContext, item.itemImage.toUri())
+            val remoteItem = remoteItemDAO.upsertInventoryItem(item.copy(itemImage = remoteUrl))
             val entity = remoteItem.toEntity()
-            Log.d("ch8n", "UpsertInventoryItem execute: remoteItem $remoteItem ")
-            Log.d("ch8n", "UpsertInventoryItem execute: entity $entity ")
             localItemDAO.insertAll(entity)
         }
     }
@@ -146,7 +151,7 @@ class DeleteInventoryItem(
     fun execute(
         itemId: InventoryItem,
     ) {
-        launch {
+        launch(NonCancellable) {
             remoteItemDAO.deleteInventoryItem(itemId.uid)
             localItemDAO.delete(itemId.toEntity())
         }

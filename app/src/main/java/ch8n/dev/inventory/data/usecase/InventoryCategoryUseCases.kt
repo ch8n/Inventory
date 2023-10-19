@@ -8,6 +8,7 @@ import ch8n.dev.inventory.data.database.roomdb.InventoryCategoryEntity
 import ch8n.dev.inventory.data.database.roomdb.LocalCategoryDAO
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -47,7 +48,7 @@ class GetInventoryCategory(
     }.flowOn(Dispatchers.IO)
 
     fun invalidate() {
-        launch {
+        launch(NonCancellable) {
             val remoteCategories = remoteCategoryDAO.getAllCategory()
             localCategoryDAO.insertAll(*remoteCategories.map { it.toEntity() }.toTypedArray())
         }
@@ -61,7 +62,7 @@ class CreateInventoryCategory(
     fun execute(
         category: InventoryCategory
     ) {
-        launch {
+        launch(NonCancellable) {
             val remoteCategory = remoteCategoryDAO.createCategory(
                 categoryName = category.name,
                 sizes = category.sizes
@@ -78,7 +79,7 @@ class DeleteInventoryCategory(
     fun execute(
         category: InventoryCategory,
     ) {
-        launch {
+        launch(NonCancellable) {
             remoteCategoryDAO.deleteCategory(category.id)
             localCategoryDAO.delete(category.toEntity())
         }

@@ -226,6 +226,12 @@ fun CreateOrderContent(
 
                         if (item != null) {
 
+                            val currentItemStock = remember(shortlistedItem) {
+                                item.itemQuantity - (shortlistedItem.get(
+                                    item.uid
+                                ) ?: 0)
+                            }
+
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.sdp),
@@ -255,13 +261,7 @@ fun CreateOrderContent(
                                     Text(text = "Color : ${item.itemColor}")
                                     Text(text = "Size : ${item.itemSize}")
                                     Text(text = "Weight : ${item.itemWeight}")
-                                    Text(
-                                        text = "Total Quantity : ${
-                                            item.itemQuantity - (shortlistedItem.get(
-                                                item.uid
-                                            ) ?: 0)
-                                        }"
-                                    )
+                                    Text(text = "Total Quantity : $currentItemStock")
                                     Text(text = "Selling : ${item.itemSellingPrice}")
                                 }
                             }
@@ -290,14 +290,16 @@ fun CreateOrderContent(
                                 ) {
 
                                     IconButton(onClick = {
-                                        val updated = orderQty + 1
-                                        val current = shortlistedItem.toMutableMap()
-                                        if (updated > 0) {
-                                            current.put(itemId, updated)
-                                        } else {
-                                            current.remove(itemId)
+                                        if (currentItemStock > 0) {
+                                            val updated = orderQty + 1
+                                            val current = shortlistedItem.toMutableMap()
+                                            if (updated > 0) {
+                                                current.put(itemId, updated)
+                                            } else {
+                                                current.remove(itemId)
+                                            }
+                                            updateShortListedItem.invoke(current)
                                         }
-                                        updateShortListedItem.invoke(current)
                                     }) {
                                         Icon(
                                             imageVector = Icons.Rounded.KeyboardArrowUp,

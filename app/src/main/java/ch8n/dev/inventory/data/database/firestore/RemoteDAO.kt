@@ -135,7 +135,7 @@ class RemoteItemDAO {
     }
 
     private fun DocumentSnapshot.getIntOrZero(key: String): Int {
-        return this.get(key) as? Int ?: 0
+        return this.getDouble(key)?.toInt() ?: 0
     }
 
     private fun DocumentSnapshot.getDoubleOrZero(key: String): Double {
@@ -150,9 +150,9 @@ class RemoteItemDAO {
                 itemName = snapshot.getStringOrEmpty("itemName"),
                 itemCategoryDocumentReferenceId = snapshot.getStringOrEmpty("itemCategoryDocumentReferenceId"),
                 itemImage = snapshot.getStringOrEmpty("itemImage"),
-                itemQuantity = snapshot.getIntOrZero("itemQuantity"),
                 itemWeight = snapshot.getDoubleOrZero("itemWeight"),
                 itemSupplierDocumentReferenceId = snapshot.getStringOrEmpty("itemSupplierDocumentReferenceId"),
+                itemQuantity = snapshot.getIntOrZero("itemQuantity"),
                 itemSellingPrice = snapshot.getIntOrZero("itemSellingPrice"),
                 itemPurchasePrice = snapshot.getIntOrZero("itemPurchasePrice"),
                 itemSize = snapshot.getStringOrEmpty("itemSize"),
