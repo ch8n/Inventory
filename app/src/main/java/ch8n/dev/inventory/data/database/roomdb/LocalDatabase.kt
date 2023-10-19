@@ -7,7 +7,11 @@ import androidx.room.RoomDatabase
 
 
 @Database(
-    entities = [InventorySupplierEntity::class, InventoryCategoryEntity::class, InventoryItemEntity::class],
+    entities = [
+        InventorySupplierEntity::class,
+        InventoryCategoryEntity::class,
+        InventoryItemEntity::class
+    ],
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {

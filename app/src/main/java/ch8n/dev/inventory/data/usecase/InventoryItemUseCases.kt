@@ -1,5 +1,6 @@
 package ch8n.dev.inventory.data.usecase
 
+import android.util.Log
 import ch8n.dev.inventory.UseCaseScope
 import ch8n.dev.inventory.data.DataModule
 import ch8n.dev.inventory.data.database.firestore.InventoryItemFS
@@ -85,6 +86,7 @@ class GetInventoryItem(
     private val remoteItemDAO: RemoteItemDAO = DataModule.Injector.remoteDatabase.remoteItemDAO,
     private val localItemDAO: LocalItemDAO = DataModule.Injector.localDatabase.localItemDAO(),
 ) : UseCaseScope {
+
     val local = localItemDAO.getAll()
         .distinctUntilChanged()
         .map { entities ->
@@ -103,9 +105,9 @@ class GetInventoryItem(
         selectedCategory: InventoryCategory
     ): Flow<List<InventoryItem>> {
         return local.map { items ->
-            items.filter {
-                if (selectedCategory == InventoryCategory.Empty) return@filter true
-                return@filter it.itemCategoryId.equals(selectedCategory.id)
+            val result = items.filter {
+                if (selectedCategory.id.isEmpty()) return@filter true
+                return@filter it.itemCategoryId == selectedCategory.id
             }.filter {
                 if (searchQuery.isNotEmpty()) {
                     return@filter it.itemName.contains(searchQuery, ignoreCase = true)
@@ -113,6 +115,8 @@ class GetInventoryItem(
                     true
                 }
             }
+            Log.d("ch8n", "GetInventoryItem filter: $result")
+            result
         }.flowOn(Dispatchers.IO)
     }
 }
@@ -127,7 +131,10 @@ class UpsertInventoryItem(
     ) {
         launch {
             val remoteItem = remoteItemDAO.upsertInventoryItem(item)
-            localItemDAO.insertAll(remoteItem.toEntity())
+            val entity = remoteItem.toEntity()
+            Log.d("ch8n", "UpsertInventoryItem execute: remoteItem $remoteItem ")
+            Log.d("ch8n", "UpsertInventoryItem execute: entity $entity ")
+            localItemDAO.insertAll(entity)
         }
     }
 }

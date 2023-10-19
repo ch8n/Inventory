@@ -11,13 +11,13 @@ data class InventoryItem(
     val itemName: String,
     val itemImage: String,
     val itemCategoryId: String,
-    val itemQuantity: Int,
     val itemWeight: Double,
     val itemSupplierId: String,
-    val itemSellingPrice: Int,
-    val itemPurchasePrice: Int,
     val itemSize: String,
     val itemColor: String,
+    val itemQuantity: Int,
+    val itemSellingPrice: Int,
+    val itemPurchasePrice: Int,
 ) {
     companion object {
 

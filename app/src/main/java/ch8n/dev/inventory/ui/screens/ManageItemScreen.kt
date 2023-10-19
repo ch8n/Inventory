@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -115,6 +116,7 @@ fun ManageItemContent(
     var purchasePrice by rememberMutableState(init = selectedItem.itemPurchasePrice.toString())
     var sellingPrice by rememberMutableState(init = selectedItem.itemSellingPrice.toString())
     var weight by rememberMutableState(init = selectedItem.itemWeight.toString())
+    var itemQuantity by rememberMutableState(init = selectedItem.itemQuantity.toString())
 
 
     LaunchedEffect(weight) {
@@ -146,6 +148,17 @@ fun ManageItemContent(
             )
         }
     }
+
+    LaunchedEffect(itemQuantity) {
+        if (purchasePrice.toIntOrNull() != null) {
+            onUpdateSelectedItem.invoke(
+                selectedItem.copy(
+                    itemQuantity = itemQuantity.toInt()
+                )
+            )
+        }
+    }
+
 
     BottomSheet(
         backgroundContent = { bottomSheetState ->
@@ -374,7 +387,7 @@ fun ManageItemContent(
                             onValueChange = {
                                 weight = it
                             },
-                            label = { Text(text = "Item weight") },
+                            label = { Text(text = "Item weight (gms)") },
                             modifier = Modifier.fillMaxWidth(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             maxLines = 1,
@@ -442,11 +455,7 @@ fun ManageItemContent(
                         ) {
 
                             IconButton(onClick = {
-                                onUpdateSelectedItem.invoke(
-                                    selectedItem.copy(
-                                        itemQuantity = selectedItem.itemQuantity + 1
-                                    )
-                                )
+                                itemQuantity = ((itemQuantity.toIntOrNull() ?: 0) + 1).toString()
                             }) {
                                 Icon(
                                     imageVector = Icons.Rounded.KeyboardArrowUp,
@@ -455,17 +464,13 @@ fun ManageItemContent(
                             }
 
                             Text(
-                                text = selectedItem.itemQuantity.toString(),
+                                text = itemQuantity,
                                 color = Color.DarkGray,
                                 fontSize = 14.ssp
                             )
 
                             IconButton(onClick = {
-                                onUpdateSelectedItem.invoke(
-                                    selectedItem.copy(
-                                        itemQuantity = selectedItem.itemQuantity - 1
-                                    )
-                                )
+                                itemQuantity = ((itemQuantity.toIntOrNull() ?: 0) - 1).toString()
                             }) {
                                 Icon(
                                     imageVector = Icons.Rounded.KeyboardArrowDown,
@@ -535,10 +540,15 @@ fun ManageItemContent(
                                         && this.itemSellingPrice > 0
                             }
                             if (isValid) {
+                                Log.d("ch8n", "adding item $selectedItem")
                                 userCaseProvider.upsertItem.execute(selectedItem)
+                                Toast.makeText(
+                                    context,
+                                    "Create item ${selectedItem.itemName}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 navigator.back()
                             }
-
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -567,6 +577,9 @@ fun ManageItemContent(
                     weight = item.itemWeight.toString()
                     purchasePrice = item.itemPurchasePrice.toString()
                     sellingPrice = item.itemSellingPrice.toString()
+                    itemQuantity = item.itemQuantity.toString()
+                    Log.d("ch8n", "selecting item $item")
+                    Log.d("ch8n", "selected item $selectedItem")
                     scope.launch {
                         bottomSheetState.hide()
                     }
@@ -720,8 +733,7 @@ fun SearchItemBottomSheetContent(
     val store = LocalUseCaseProvider.current
     val scope = rememberCoroutineScope()
     val categories by store.getCategory.local.collectAsState(initial = emptyList())
-    val items by store.getItems.filter(searchQuery, selectedCategory)
-        .collectAsState(initial = emptyList())
+    val items by store.getItems.filter(searchQuery, selectedCategory).collectAsState(initial = emptyList())
 
     Column(
         modifier = Modifier
