@@ -70,6 +70,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.content.FileProvider
+import androidx.core.net.toFile
 import androidx.core.net.toUri
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
@@ -263,7 +264,7 @@ fun ManageItemContent(
                                 val imageUri = createImageUri(context)
                                 cameraUri = imageUri
                                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
                                 singleCameraShotLauncher.launch(takePictureIntent)
                             }
                         )
