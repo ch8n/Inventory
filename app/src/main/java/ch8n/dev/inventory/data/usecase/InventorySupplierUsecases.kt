@@ -11,6 +11,7 @@ import ch8n.dev.inventory.data.database.roomdb.LocalSuppliersDAO
 import ch8n.dev.inventory.data.domain.InventorySupplier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -67,7 +68,7 @@ class CreateInventorySuppliers(
 
     fun execute(supplier: String) {
         if (supplier.isEmpty() || supplier.isBlank()) return
-        launch {
+        launch(NonCancellable) {
             Log.d("ch8n", "CreateInventorySuppliers $supplier")
             val remoteSupplier = remoteSupplierDAO.createSupplier(supplier)
             localSuppliersDAO.insertAll(remoteSupplier.toEntity())
@@ -102,7 +103,7 @@ class DeleteInventorySupplier(
     private val localSuppliersDAO: LocalSuppliersDAO = DataModule.Injector.localDatabase.localSuppliersDAO(),
 ) : UseCaseScope {
     fun execute(supplier: InventorySupplier) {
-        launch {
+        launch(NonCancellable) {
             remoteSupplierDAO.deleteSupplier(supplier.id)
             localSuppliersDAO.delete(supplier.toEntity())
         }

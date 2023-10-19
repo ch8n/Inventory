@@ -147,7 +147,7 @@ class DeleteInventoryItem(
     fun execute(
         itemId: InventoryItem,
     ) {
-        launch {
+        launch(NonCancellable) {
             remoteItemDAO.deleteInventoryItem(itemId.uid)
             localItemDAO.delete(itemId.toEntity())
         }
