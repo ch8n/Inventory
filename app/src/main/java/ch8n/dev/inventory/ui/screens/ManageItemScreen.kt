@@ -72,7 +72,6 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
-import ch8n.dev.inventory.data.domain.InventorySupplier
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
@@ -117,9 +116,6 @@ fun ManageItemContent(
     var sellingPrice by rememberMutableState(init = selectedItem.itemSellingPrice.toString())
     var weight by rememberMutableState(init = selectedItem.itemWeight.toString())
 
-    LaunchedEffect(Unit){
-        userCaseProvider.getItems.invalidate()
-    }
 
     LaunchedEffect(weight) {
         if (weight.toDoubleOrNull() != null) {
@@ -576,8 +572,10 @@ fun ManageItemContent(
                     }
                 },
                 onDelete = { item ->
-                    userCaseProvider.deleteItem.execute(item.uid)
-                    navigator.back()
+                    userCaseProvider.deleteItem.execute(item)
+                    scope.launch {
+                        bottomSheetState.hide()
+                    }
                 },
                 searchQuery = searchQuery,
                 updateSearchQuery = updateSearchQuery,

@@ -2,7 +2,6 @@ package ch8n.dev.inventory.data.usecase
 
 import ch8n.dev.inventory.UseCaseScope
 import ch8n.dev.inventory.data.DataModule
-import ch8n.dev.inventory.data.database.InMemoryDB
 import ch8n.dev.inventory.data.database.firestore.InventoryItemFS
 import ch8n.dev.inventory.data.database.firestore.RemoteItemDAO
 import ch8n.dev.inventory.data.database.roomdb.InventoryItemEntity
@@ -12,7 +11,6 @@ import ch8n.dev.inventory.data.domain.InventoryItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -52,6 +50,22 @@ fun InventoryItemFS.toEntity(): InventoryItemEntity {
 
 fun InventoryItemEntity.toView(): InventoryItem {
     return InventoryItem(
+        uid = uid,
+        itemName = itemName,
+        itemCategoryId = itemCategoryId,
+        itemImage = itemImage,
+        itemQuantity = itemQuantity,
+        itemWeight = itemWeight,
+        itemSupplierId = itemSupplierId,
+        itemSellingPrice = itemSellingPrice,
+        itemPurchasePrice = itemPurchasePrice,
+        itemSize = itemSize,
+        itemColor = itemColor
+    )
+}
+
+fun InventoryItem.toEntity(): InventoryItemEntity {
+    return InventoryItemEntity(
         uid = uid,
         itemName = itemName,
         itemCategoryId = itemCategoryId,
@@ -119,11 +133,15 @@ class UpsertInventoryItem(
 }
 
 class DeleteInventoryItem(
-    private val database: InMemoryDB = InMemoryDB,
-) {
+    private val remoteItemDAO: RemoteItemDAO = DataModule.Injector.remoteDatabase.remoteItemDAO,
+    private val localItemDAO: LocalItemDAO = DataModule.Injector.localDatabase.localItemDAO(),
+) : UseCaseScope {
     fun execute(
-        itemId: String,
+        itemId: InventoryItem,
     ) {
-        database.deleteInventoryItem(itemId)
+        launch {
+            remoteItemDAO.deleteInventoryItem(itemId.uid)
+            localItemDAO.delete(itemId.toEntity())
+        }
     }
 }

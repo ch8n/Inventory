@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import ch8n.dev.inventory.data.DataModule
@@ -14,6 +15,7 @@ import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.Order
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.ui.LocalNavigator
+import ch8n.dev.inventory.ui.LocalUseCaseProvider
 import ch8n.dev.inventory.ui.WithUseCaseProvider
 import ch8n.dev.inventory.ui.WithNavigator
 import ch8n.dev.inventory.ui.screens.CreateOrderContent
@@ -33,10 +35,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         DataModule.Injector.provideAppContext(applicationContext)
+
         setContent {
             InventoryTheme {
                 WithNavigator {
                     WithUseCaseProvider {
+
+                        val userCaseProvider = LocalUseCaseProvider.current
+
+                        LaunchedEffect(Unit){
+                            userCaseProvider.getSupplier.invalidate()
+                            userCaseProvider.getCategory.invalidate()
+                            userCaseProvider.getItems.invalidate()
+                        }
+
                         val navigator = LocalNavigator.current
 
                         val currentDestination by navigator

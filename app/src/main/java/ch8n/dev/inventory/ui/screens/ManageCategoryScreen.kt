@@ -50,10 +50,6 @@ fun ManageCategoryContent() {
 
     val categories by userCaseProvider.getCategory.local.collectAsState(emptyList())
 
-    LaunchedEffect(Unit) {
-        userCaseProvider.getCategory.invalidate()
-    }
-
     BottomSheet(
         backgroundContent = { bottomSheetState ->
             Box(

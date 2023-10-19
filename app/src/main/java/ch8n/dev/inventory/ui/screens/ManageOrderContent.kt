@@ -58,7 +58,6 @@ fun ManageOrderContent() {
     val pageState = rememberPagerState()
     var searchQuery by rememberMutableState(init = "")
 
-
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {

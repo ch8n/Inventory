@@ -13,14 +13,14 @@ data class InventoryCategoryFS(
 
 data class InventoryItemFS(
     val documentReferenceId: String,
-    val itemName: String,
     val itemCategoryDocumentReferenceId: String,
     val itemImage: String,
-    val itemQuantity: Int,
-    val itemWeight: Double,
-    val itemSupplierDocumentReferenceId: String,
-    val itemSellingPrice: Int,
-    val itemPurchasePrice: Int,
-    val itemSize: String,
     val itemColor: String,
+    val itemName: String,
+    val itemPurchasePrice: Int,
+    val itemQuantity: Int,
+    val itemSellingPrice: Int,
+    val itemSize: String,
+    val itemSupplierDocumentReferenceId: String,
+    val itemWeight: Double,
 )

@@ -36,10 +36,6 @@ fun ManageSupplierContent() {
 
     val userCaseProvider = LocalUseCaseProvider.current
 
-    LaunchedEffect(Unit) {
-        userCaseProvider.getSupplier.invalidate()
-    }
-
     val suppliers by userCaseProvider.getSupplier.local.collectAsState(emptyList())
     var newSupplier by rememberMutableState(init = "")
 
