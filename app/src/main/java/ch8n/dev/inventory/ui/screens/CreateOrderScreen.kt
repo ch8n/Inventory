@@ -77,7 +77,7 @@ fun CreateOrderContent(
     val userCaseProvider = LocalUseCaseProvider.current
     val navigator = LocalNavigator.current
 
-    val items by userCaseProvider.getItems.category_filter(searchQuery, selectedCategory)
+    val items by userCaseProvider.getItems.categoryFilter(searchQuery, selectedCategory)
         .collectAsState(initial = emptyList())
 
     BottomSheet(

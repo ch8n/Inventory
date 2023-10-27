@@ -742,9 +742,9 @@ fun SearchItemBottomSheetContent(
     val scope = rememberCoroutineScope()
     val categories by store.getCategory.local.collectAsState(initial = emptyList())
     val supplier by store.getSupplier.local.collectAsState(initial = emptyList())
-    val items by store.getItems.category_filter(searchQuery, selectedCategory)
+    val items by store.getItems.categoryFilter(searchQuery, selectedCategory)
         .collectAsState(initial = emptyList())
-    val item by store.getItems.supplier_filter(searchQuery, selectedSupplier)
+    val item by store.getItems.supplierFilter(searchQuery, selectedSupplier)
         .collectAsState(initial = emptyList())
 
 

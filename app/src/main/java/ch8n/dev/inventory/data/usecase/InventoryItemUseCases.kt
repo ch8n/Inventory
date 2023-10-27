@@ -105,7 +105,7 @@ class GetInventoryItem(
         }
     }
 
-    fun category_filter(
+    fun categoryFilter(
         searchQuery: String,
         selectedCategory: InventoryCategory
     ): Flow<List<InventoryItem>> {
@@ -125,7 +125,7 @@ class GetInventoryItem(
         }.flowOn(Dispatchers.IO)
     }
 
-    fun supplier_filter(
+    fun supplierFilter(
         searchQuery: String,
         selectedSupplier: InventorySupplier
     ): Flow<List<InventoryItem>> {
