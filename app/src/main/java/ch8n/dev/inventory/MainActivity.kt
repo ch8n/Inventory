@@ -12,12 +12,13 @@ import androidx.compose.runtime.getValue
 import ch8n.dev.inventory.data.DataModule
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
+import ch8n.dev.inventory.data.domain.InventorySupplier
 import ch8n.dev.inventory.data.domain.Order
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.ui.LocalNavigator
 import ch8n.dev.inventory.ui.LocalUseCaseProvider
-import ch8n.dev.inventory.ui.WithUseCaseProvider
 import ch8n.dev.inventory.ui.WithNavigator
+import ch8n.dev.inventory.ui.WithUseCaseProvider
 import ch8n.dev.inventory.ui.screens.CreateOrderContent
 import ch8n.dev.inventory.ui.screens.HomeContent
 import ch8n.dev.inventory.ui.screens.ImagePreviewContent
@@ -43,7 +44,7 @@ class MainActivity : ComponentActivity() {
 
                         val userCaseProvider = LocalUseCaseProvider.current
 
-                        LaunchedEffect(Unit){
+                        LaunchedEffect(Unit) {
                             userCaseProvider.getSupplier.invalidate()
                             userCaseProvider.getCategory.invalidate()
                             userCaseProvider.getItems.invalidate()
@@ -71,11 +72,13 @@ class MainActivity : ComponentActivity() {
 
 
 sealed class Screen {
+
     @Composable
     abstract fun Content()
 }
 
 object HomeScreen : Screen() {
+
     @Composable
     override fun Content() {
         HomeContent()
@@ -106,6 +109,7 @@ class ManageItemScreen : Screen() {
     private val selectedItem = MutableStateFlow(InventoryItem.New)
     private val searchQuery = MutableStateFlow("")
     private val selectedCategory = MutableStateFlow(InventoryCategory.Empty)
+    private val selectedSupplier = MutableStateFlow(InventorySupplier.Empty)
     private val scrollPosition = MutableStateFlow(0)
 
     @Composable
@@ -113,6 +117,7 @@ class ManageItemScreen : Screen() {
         val selectedItem by selectedItem.collectAsState()
         val searchQuery by searchQuery.collectAsState()
         val selectedCategory by selectedCategory.collectAsState()
+        val selectedSupplier by selectedSupplier.collectAsState()
         val scrollPosition by scrollPosition.collectAsState()
 
         ManageItemContent(
@@ -128,6 +133,10 @@ class ManageItemScreen : Screen() {
             updateSelectedCategory = {
                 this.selectedCategory.tryEmit(it)
             },
+            selectedSupplier = selectedSupplier,
+            updateSelectedSupplier = {
+                this.selectedSupplier.tryEmit(it)
+            },
             initialScrollPosition = scrollPosition,
             onScrollPositionChanged = {
                 this.scrollPosition.tryEmit(it)
@@ -142,11 +151,13 @@ object CreateOrderScreen : Screen() {
     private val selectedOrderStatus = MutableStateFlow(OrderStatus.NEW_ORDER)
     private val searchQuery = MutableStateFlow("")
     private val selectedCategory = MutableStateFlow(InventoryCategory.Empty)
+    private val selectedSupplier = MutableStateFlow(InventorySupplier.Empty)
     private val scrollPosition = MutableStateFlow(0)
     private val clientName = MutableStateFlow("")
     private val clientContact = MutableStateFlow("")
     private val orderComment = MutableStateFlow("")
     private val shortlistedItem = MutableStateFlow(mapOf<String, Int>())
+
 
     @Composable
     override fun Content() {
@@ -156,6 +167,7 @@ object CreateOrderScreen : Screen() {
 
         val searchQuery by searchQuery.collectAsState()
         val selectedCategory by selectedCategory.collectAsState()
+        val selectedSupplier by selectedSupplier.collectAsState()
         val scrollPosition by scrollPosition.collectAsState()
         val clientName by clientName.collectAsState()
         val clientContact by clientContact.collectAsState()
@@ -189,6 +201,10 @@ object CreateOrderScreen : Screen() {
             selectedCategory = selectedCategory,
             updateSelectedCategory = {
                 this.selectedCategory.tryEmit(it)
+            },
+            selectedSupplier = selectedSupplier,
+            updateSelectedSupplier = {
+                this.selectedSupplier.tryEmit(it)
             },
             initialScrollPosition = scrollPosition,
             onScrollPositionChanged = {

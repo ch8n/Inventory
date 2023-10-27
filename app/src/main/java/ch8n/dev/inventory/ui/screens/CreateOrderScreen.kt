@@ -38,6 +38,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.core.net.toUri
 import ch8n.dev.inventory.ImagePreviewScreen
 import ch8n.dev.inventory.data.domain.InventoryCategory
+import ch8n.dev.inventory.data.domain.InventorySupplier
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.data.usecase.ItemOrder
 import ch8n.dev.inventory.sdp
@@ -49,6 +50,7 @@ import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+
 @Composable
 fun CreateOrderContent(
     shortlistedItem: Map<String, Int>,
@@ -65,6 +67,8 @@ fun CreateOrderContent(
     updateSearchQuery: (updated: String) -> Unit,
     selectedCategory: InventoryCategory,
     updateSelectedCategory: (updated: InventoryCategory) -> Unit,
+    selectedSupplier: InventorySupplier,
+    updateSelectedSupplier: (updated: InventorySupplier) -> Unit,
     initialScrollPosition: Int,
     onScrollPositionChanged: (position: Int) -> Unit,
 ) {
@@ -73,7 +77,7 @@ fun CreateOrderContent(
     val userCaseProvider = LocalUseCaseProvider.current
     val navigator = LocalNavigator.current
 
-    val items by userCaseProvider.getItems.filter(searchQuery, selectedCategory)
+    val items by userCaseProvider.getItems.categoryFilter(searchQuery, selectedCategory)
         .collectAsState(initial = emptyList())
 
     BottomSheet(
@@ -94,6 +98,8 @@ fun CreateOrderContent(
                 updateSearchQuery = updateSearchQuery,
                 selectedCategory = selectedCategory,
                 updateSelectedCategory = updateSelectedCategory,
+                selectedSupplier = selectedSupplier,
+                updateSelectedSupplier = updateSelectedSupplier,
                 initialScrollPosition = initialScrollPosition,
                 onScrollPositionChanged = onScrollPositionChanged
             )
@@ -386,8 +392,8 @@ fun CreateOrderContent(
     )
 }
 
-
 @Composable
+
 fun RowSummaryText(
     key: String,
     value: String

@@ -3,13 +3,11 @@ package ch8n.dev.inventory.data.usecase
 import android.util.Log
 import ch8n.dev.inventory.UseCaseScope
 import ch8n.dev.inventory.data.DataModule
-import ch8n.dev.inventory.data.database.InMemoryDB
 import ch8n.dev.inventory.data.database.firestore.InventorySupplierFS
 import ch8n.dev.inventory.data.database.firestore.RemoteSupplierDAO
 import ch8n.dev.inventory.data.database.roomdb.InventorySupplierEntity
 import ch8n.dev.inventory.data.database.roomdb.LocalSuppliersDAO
 import ch8n.dev.inventory.data.domain.InventorySupplier
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -29,6 +27,7 @@ fun InventorySupplier.toEntity(): InventorySupplierEntity {
     return InventorySupplierEntity(
         uid = id,
         supplierName = name
+
     )
 }
 

@@ -1,6 +1,5 @@
 package ch8n.dev.inventory.ui
 
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider

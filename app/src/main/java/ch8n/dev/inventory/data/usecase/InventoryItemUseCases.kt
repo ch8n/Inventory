@@ -12,6 +12,7 @@ import ch8n.dev.inventory.data.database.roomdb.InventoryItemEntity
 import ch8n.dev.inventory.data.database.roomdb.LocalItemDAO
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
+import ch8n.dev.inventory.data.domain.InventorySupplier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
@@ -104,7 +105,7 @@ class GetInventoryItem(
         }
     }
 
-    fun filter(
+    fun categoryFilter(
         searchQuery: String,
         selectedCategory: InventoryCategory
     ): Flow<List<InventoryItem>> {
@@ -112,6 +113,26 @@ class GetInventoryItem(
             val result = items.filter {
                 if (selectedCategory.id.isEmpty()) return@filter true
                 return@filter it.itemCategoryId == selectedCategory.id
+            }.filter {
+                if (searchQuery.isNotEmpty()) {
+                    return@filter it.itemName.contains(searchQuery, ignoreCase = true)
+                } else {
+                    true
+                }
+            }
+            Log.d("ch8n", "GetInventoryItem filter: $result")
+            result
+        }.flowOn(Dispatchers.IO)
+    }
+
+    fun supplierFilter(
+        searchQuery: String,
+        selectedSupplier: InventorySupplier
+    ): Flow<List<InventoryItem>> {
+        return local.map { items ->
+            val result = items.filter {
+                if (selectedSupplier.id.isEmpty()) return@filter true
+                return@filter it.itemSupplierId == selectedSupplier.id
             }.filter {
                 if (searchQuery.isNotEmpty()) {
                     return@filter it.itemName.contains(searchQuery, ignoreCase = true)
