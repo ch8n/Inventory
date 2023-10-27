@@ -23,7 +23,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +36,6 @@ import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
 import ch8n.dev.inventory.ui.LocalUseCaseProvider
-import ch8n.dev.inventory.ui.LocalNavigator
 import kotlinx.coroutines.launch
 
 

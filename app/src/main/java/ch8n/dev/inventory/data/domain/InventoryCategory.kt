@@ -64,6 +64,7 @@ data class InventorySupplier(
         val Empty = InventorySupplier(
             id = "",
             name = ""
+
         )
     }
 }

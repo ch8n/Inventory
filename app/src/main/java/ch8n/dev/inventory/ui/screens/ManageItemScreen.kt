@@ -70,25 +70,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.content.FileProvider
-import androidx.core.net.toFile
 import androidx.core.net.toUri
+import ch8n.dev.inventory.*
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
-import ch8n.dev.inventory.rememberMutableState
-import ch8n.dev.inventory.sdp
-import ch8n.dev.inventory.ssp
-import ch8n.dev.inventory.ui.LocalUseCaseProvider
+import ch8n.dev.inventory.data.domain.InventorySupplier
 import ch8n.dev.inventory.ui.LocalNavigator
+import ch8n.dev.inventory.ui.LocalUseCaseProvider
 import coil.compose.AsyncImage
-import kotlinx.coroutines.launch
-import java.io.File
-import java.util.UUID
-import ch8n.dev.inventory.*
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import java.io.File
+import java.util.UUID
 
 
 @OptIn(
@@ -102,7 +99,9 @@ fun ManageItemContent(
     searchQuery: String,
     updateSearchQuery: (updated: String) -> Unit,
     selectedCategory: InventoryCategory,
+    selectedSupplier: InventorySupplier,
     updateSelectedCategory: (updated: InventoryCategory) -> Unit,
+    updateSelectedSupplier: (updated: InventorySupplier) -> Unit,
     initialScrollPosition: Int,
     onScrollPositionChanged: (position: Int) -> Unit,
 ) {
@@ -342,9 +341,11 @@ fun ManageItemContent(
                                 readOnly = true,
                                 trailingIcon = {
                                     IconButton(onClick = {
+
                                         onUpdateSelectedItem.invoke(
                                             selectedItem.copy(
                                                 itemSupplierId = ""
+
                                             )
                                         )
                                     }) {
@@ -531,7 +532,8 @@ fun ManageItemContent(
                         onClick = {
                             val isValid = with(selectedItem) {
                                 itemName.isNotEmpty()
-                                        && itemImage.isNotEmpty()
+
+                                        //  && itemImage.isNotEmpty()
                                         && itemCategoryId.isNotEmpty()
                                         && this.itemSupplierId.isNotEmpty()
                                         && itemColor.isNotEmpty()
@@ -566,6 +568,7 @@ fun ManageItemContent(
                     ) {
                         Text(text = "+ Select Existing Item")
                     }
+
                 }
 
 
@@ -594,7 +597,9 @@ fun ManageItemContent(
                 searchQuery = searchQuery,
                 updateSearchQuery = updateSearchQuery,
                 selectedCategory = selectedCategory,
+                selectedSupplier = selectedSupplier,
                 updateSelectedCategory = updateSelectedCategory,
+                updateSelectedSupplier = updateSelectedSupplier,
                 initialScrollPosition = initialScrollPosition,
                 onScrollPositionChanged = onScrollPositionChanged
             )
@@ -628,7 +633,7 @@ fun ImageItemUI(
             color = Color.DarkGray
         )
 
-        LazyRow() {
+        LazyRow {
             item {
 
                 Column(
@@ -723,7 +728,9 @@ fun SearchItemBottomSheetContent(
     searchQuery: String,
     updateSearchQuery: (updated: String) -> Unit,
     selectedCategory: InventoryCategory,
+    selectedSupplier: InventorySupplier,
     updateSelectedCategory: (updated: InventoryCategory) -> Unit,
+    updateSelectedSupplier: (updated: InventorySupplier) -> Unit,
     initialScrollPosition: Int,
     onScrollPositionChanged: (position: Int) -> Unit,
     onSelect: (item: InventoryItem) -> Unit,
@@ -734,7 +741,12 @@ fun SearchItemBottomSheetContent(
     val store = LocalUseCaseProvider.current
     val scope = rememberCoroutineScope()
     val categories by store.getCategory.local.collectAsState(initial = emptyList())
-    val items by store.getItems.filter(searchQuery, selectedCategory).collectAsState(initial = emptyList())
+    val supplier by store.getSupplier.local.collectAsState(initial = emptyList())
+    val items by store.getItems.category_filter(searchQuery, selectedCategory)
+        .collectAsState(initial = emptyList())
+    val item by store.getItems.supplier_filter(searchQuery, selectedSupplier)
+        .collectAsState(initial = emptyList())
+
 
     Column(
         modifier = Modifier
@@ -809,7 +821,9 @@ fun SearchItemBottomSheetContent(
                     dropdownOptions = categories.map { it.name },
                     onSelected = { index ->
                         updateSelectedCategory.invoke(categories.get(index))
+                        updateSelectedSupplier.invoke(InventorySupplier.Empty)
                     }
+
                 )
 
                 AnimatedVisibility(visible = selectedCategory != InventoryCategory.Empty) {
@@ -836,9 +850,47 @@ fun SearchItemBottomSheetContent(
                         }
                     )
                 }
+                OptionDropDown(
+                    title = "Select Suppliers",
+                    dropdownOptions = supplier.map { it.name },
+                    onSelected = { index ->
+                        updateSelectedSupplier.invoke(supplier.get(index))
+                        updateSelectedCategory.invoke(InventoryCategory.Empty)
+                    }
+
+                )
+
+                AnimatedVisibility(visible = selectedSupplier != InventorySupplier.Empty) {
+                    OutlinedTextField(
+                        value = selectedSupplier.name,
+                        onValueChange = {},
+                        label = { Text(text = "Option Selected") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.sdp),
+                        readOnly = true,
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = Color.DarkGray
+                        ),
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                updateSelectedSupplier.invoke(InventorySupplier.Empty)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    )
+                }
             }
 
-            itemsIndexed(items) { index, item ->
+            itemsIndexed(
+                if (selectedCategory != InventoryCategory.Empty) items
+                else if (selectedSupplier != InventorySupplier.Empty) item
+                else items
+            ) { index, item ->
 
                 Column(
                     modifier = Modifier

@@ -18,12 +18,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
@@ -31,6 +31,8 @@ import ch8n.dev.inventory.ui.LocalUseCaseProvider
 
 
 @OptIn(ExperimentalMaterial3Api::class)
+
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ManageSupplierContent() {
 
