@@ -771,9 +771,7 @@ fun SearchItemBottomSheetContent(
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.sdp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.9f),
+            modifier = Modifier.fillMaxSize(),
             state = scrollState
         ) {
             item {
@@ -844,6 +842,31 @@ fun SearchItemBottomSheetContent(
                         trailingIcon = {
                             IconButton(onClick = {
                                 updateSelectedCategory.invoke(InventoryCategory.Empty)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    )
+                }
+
+                AnimatedVisibility(visible = selectedSupplier != InventorySupplier.Empty) {
+                    OutlinedTextField(
+                        value = selectedSupplier.name,
+                        onValueChange = {},
+                        label = { Text(text = "Option Selected") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.sdp),
+                        readOnly = true,
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = Color.DarkGray
+                        ),
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                updateSelectedSupplier.invoke(InventorySupplier.Empty)
                             }) {
                                 Icon(
                                     imageVector = Icons.Outlined.Delete,
