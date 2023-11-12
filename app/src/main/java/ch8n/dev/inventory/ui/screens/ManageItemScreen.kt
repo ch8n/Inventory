@@ -84,6 +84,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 import ch8n.dev.inventory.*
+import ch8n.dev.inventory.data.domain.InventorySupplier
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -102,7 +103,9 @@ fun ManageItemContent(
     searchQuery: String,
     updateSearchQuery: (updated: String) -> Unit,
     selectedCategory: InventoryCategory,
+    selectedSupplier: InventorySupplier,
     updateSelectedCategory: (updated: InventoryCategory) -> Unit,
+    updateSelectedSupplier: (updated: InventorySupplier) -> Unit,
     initialScrollPosition: Int,
     onScrollPositionChanged: (position: Int) -> Unit,
 ) {
@@ -594,9 +597,11 @@ fun ManageItemContent(
                 searchQuery = searchQuery,
                 updateSearchQuery = updateSearchQuery,
                 selectedCategory = selectedCategory,
+                selectedSupplier = selectedSupplier,
                 updateSelectedCategory = updateSelectedCategory,
+                updateSelectedSupplier = updateSelectedSupplier,
                 initialScrollPosition = initialScrollPosition,
-                onScrollPositionChanged = onScrollPositionChanged
+                onScrollPositionChanged = onScrollPositionChanged,
             )
         }
     )
@@ -723,6 +728,8 @@ fun SearchItemBottomSheetContent(
     searchQuery: String,
     updateSearchQuery: (updated: String) -> Unit,
     selectedCategory: InventoryCategory,
+    selectedSupplier: InventorySupplier,
+    updateSelectedSupplier: (updated: InventorySupplier) -> Unit,
     updateSelectedCategory: (updated: InventoryCategory) -> Unit,
     initialScrollPosition: Int,
     onScrollPositionChanged: (position: Int) -> Unit,
@@ -734,7 +741,9 @@ fun SearchItemBottomSheetContent(
     val store = LocalUseCaseProvider.current
     val scope = rememberCoroutineScope()
     val categories by store.getCategory.local.collectAsState(initial = emptyList())
-    val items by store.getItems.filter(searchQuery, selectedCategory).collectAsState(initial = emptyList())
+    val suppliers by store.getSupplier.local.collectAsState(initial = emptyList())
+    val items by store.getItems.filter(searchQuery, selectedCategory, selectedSupplier)
+        .collectAsState(initial = emptyList())
 
     Column(
         modifier = Modifier
@@ -809,6 +818,14 @@ fun SearchItemBottomSheetContent(
                     dropdownOptions = categories.map { it.name },
                     onSelected = { index ->
                         updateSelectedCategory.invoke(categories.get(index))
+                    }
+                )
+
+                OptionDropDown(
+                    title = "Select Supplier",
+                    dropdownOptions = suppliers.map { it.name },
+                    onSelected = { index ->
+                        updateSelectedSupplier.invoke(suppliers.get(index))
                     }
                 )
 
