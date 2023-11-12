@@ -2,6 +2,9 @@ package ch8n.dev.inventory.data.database.firestore
 
 import android.util.Log
 import ch8n.dev.inventory.data.domain.InventoryItem
+import ch8n.dev.inventory.data.domain.Order
+import ch8n.dev.inventory.data.domain.OrderStatus
+import ch8n.dev.inventory.data.usecase.ItemOrder
 import ch8n.dev.inventory.data.usecase.toRemote
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
@@ -195,6 +198,88 @@ class RemoteItemDAO {
 
     suspend fun deleteInventoryItem(itemId: String) {
         itemDocumentReference.document(itemId).delete().await()
+    }
+
+}
+
+
+class RemoteOrderDAO {
+    object Schema {
+        const val ORDERS = "orders"
+    }
+
+    private val remoteDB = Firebase.firestore
+    private val orderDocumentReference = remoteDB.collection(Schema.ORDERS)
+
+    private fun DocumentSnapshot.getStringOrEmpty(key: String): String {
+        return this.getString(key) ?: ""
+    }
+
+    private fun DocumentSnapshot.getIntOrZero(key: String): Int {
+        return this.getDouble(key)?.toInt() ?: 0
+    }
+
+    private fun DocumentSnapshot.getLongOrZero(key: String): Long {
+        return this.getLong(key) ?: 0L
+    }
+
+    private fun DocumentSnapshot.getDoubleOrZero(key: String): Double {
+        return this.getDouble(key) ?: 0.0
+    }
+
+    private fun <T> DocumentSnapshot.getList(key: String): List<T> {
+        return this.get(key, List::class.java)?.mapNotNull { it as? T } ?: emptyList()
+    }
+
+    suspend fun getAllOrders(): List<OrderFS> {
+        val querySnapShot = orderDocumentReference.get().await()
+        val orderFS = querySnapShot.documents.map { snapshot ->
+            OrderFS(
+                documentReferenceId = snapshot.id,
+                clientName = snapshot.getStringOrEmpty("clientName"),
+                contact = snapshot.getStringOrEmpty("contact"),
+                comment = snapshot.getStringOrEmpty("comment"),
+                totalPrice = snapshot.getIntOrZero("totalPrice"),
+                totalWeight = snapshot.getDoubleOrZero("totalWeight"),
+                itemsIds = snapshot.getList<ItemOrder>("itemsIds"),
+                orderStatus = OrderStatus.getOrIssue(snapshot.getStringOrEmpty("orderStatus")),
+                createdAt = snapshot.getLongOrZero("createdAt")
+            )
+        }
+        return orderFS
+    }
+
+    suspend fun upsertInventoryItem(
+        order: Order
+    ): OrderFS {
+
+        val attributes = hashMapOf(
+            "clientName" to order.clientName,
+            "contact" to order.contact,
+            "comment" to order.comment,
+            "totalPrice" to order.totalPrice,
+            "totalWeight" to order.totalWeight,
+            "itemsIds" to order.itemsIds,
+            "orderStatus" to order.orderStatus,
+            "createdAt" to order.createdAt
+        )
+
+        val _documentReferenceId = orderDocumentReference
+            .run {
+                if (order.uid.isNotEmpty()) {
+                    document(order.uid).set(attributes).await()
+                    order.uid
+                } else {
+                    val documentReference = add(attributes).await()
+                    documentReference.id
+                }
+            }
+
+        return order.toRemote().copy(documentReferenceId = _documentReferenceId)
+    }
+
+    suspend fun deleteOrder(itemId: String) {
+        orderDocumentReference.document(itemId).delete().await()
     }
 
 }

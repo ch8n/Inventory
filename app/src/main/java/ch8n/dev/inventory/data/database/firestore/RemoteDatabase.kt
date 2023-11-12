@@ -9,10 +9,12 @@ class RemoteDatabase {
     private val _remoteCategoryDAO by lazy { RemoteCategoryDAO() }
     private val _remoteItemDAO by lazy { RemoteItemDAO() }
     private val _remoteUploadDAO by lazy { RemoteUploadDAO() }
+    private val _remoteOrderDAO by lazy { RemoteOrderDAO() }
     val remoteSuppliersDAO get() = _remoteSupplierDAO
     val remoteCategoryDAO get() = _remoteCategoryDAO
     val remoteItemDAO get() = _remoteItemDAO
     val remoteUploadDAO get() = _remoteUploadDAO
+    val remoteOrderDAO get() = _remoteOrderDAO
 
 }
 

@@ -39,6 +39,7 @@ import androidx.core.net.toUri
 import ch8n.dev.inventory.ImagePreviewScreen
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventorySupplier
+import ch8n.dev.inventory.data.domain.Order
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.data.usecase.ItemOrder
 import ch8n.dev.inventory.sdp
@@ -368,15 +369,18 @@ fun CreateOrderContent(
                     OutlinedButton(
                         onClick = {
                             userCaseProvider.createOrder.execute(
-                                clientName = clientName,
-                                contact = clientContact,
-                                comment = orderComment,
-                                totalPrice = totalPrice,
-                                totalWeight = totalWeight,
-                                itemsIds = shortlistedItem.entries.map { (key, value) ->
-                                    ItemOrder(key, value)
-                                },
-                                orderStatus = selectedOrderStatus
+                                Order(
+                                    clientName = clientName,
+                                    contact = clientContact,
+                                    comment = orderComment,
+                                    totalPrice = totalPrice,
+                                    totalWeight = totalWeight,
+                                    itemsIds = shortlistedItem.entries.map { (key, value) ->
+                                        ItemOrder(key, value)
+                                    },
+                                    orderStatus = selectedOrderStatus,
+                                    createdAt = System.currentTimeMillis()
+                                )
                             )
                             navigator.back()
                         },

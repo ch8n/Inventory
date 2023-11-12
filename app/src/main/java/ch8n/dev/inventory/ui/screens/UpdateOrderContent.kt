@@ -216,15 +216,15 @@ fun UpdateOrderContent(order: Order) {
         item {
             OutlinedButton(
                 onClick = {
-                    store.updateOrder.execute(
-                        clientName = clientName,
-                        contact = clientContact,
-                        comment = comment,
-                        totalPrice = totalPrice,
-                        totalWeight = totalWeight,
-                        itemsIds = itemsIds,
-                        orderStatus = orderStatus
-                    )
+//                    store.updateOrder.execute(
+//                        clientName = clientName,
+//                        contact = clientContact,
+//                        comment = comment,
+//                        totalPrice = totalPrice,
+//                        totalWeight = totalWeight,
+//                        itemsIds = itemsIds,
+//                        orderStatus = orderStatus
+//                    )
                     navigator.back()
                 },
                 modifier = Modifier.fillMaxWidth()

@@ -75,11 +75,17 @@ enum class OrderStatus {
     PACKED,
     DISPATCHED,
     DELIVERED,
-    ISSUE
+    ISSUE;
+
+    companion object {
+        fun getOrIssue(string: String): OrderStatus {
+            return kotlin.runCatching { valueOf(string) }.getOrNull() ?: ISSUE
+        }
+    }
 }
 
 data class Order(
-    val id: String = UUID.randomUUID().toString(),
+    val uid: String = UUID.randomUUID().toString(),
     val clientName: String,
     val contact: String,
     val comment: String,
@@ -87,5 +93,5 @@ data class Order(
     val totalWeight: Double,
     val itemsIds: List<ItemOrder>,
     val orderStatus: OrderStatus,
-    val createdAt: Long = System.currentTimeMillis(),
+    val createdAt: Long
 )
