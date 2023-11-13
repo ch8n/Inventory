@@ -371,7 +371,7 @@ fun CreateOrderContent(
                     OutlinedButton(
                         onClick = {
                             if (clientName.isEmpty()) return@OutlinedButton context.toast("Empty Name!")
-                            if (clientContact.isEmpty() && clientContact.length != 10) return@OutlinedButton context.toast("10 digit Contact!")
+                            if (clientContact.length != 10) return@OutlinedButton context.toast("10 digit Contact!")
                             val orders = shortlistedItem.entries.filter { it.value > 0 }
                             if (orders.isEmpty()) return@OutlinedButton context.toast("Cart is Empty!")
 
