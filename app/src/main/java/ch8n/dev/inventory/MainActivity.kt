@@ -144,7 +144,7 @@ class ManageItemScreen : Screen() {
     }
 }
 
-object CreateOrderScreen : Screen() {
+class CreateOrderScreen() : Screen() {
 
     private val selectedOrderStatus = MutableStateFlow(OrderStatus.NEW_ORDER)
     private val searchQuery = MutableStateFlow("")

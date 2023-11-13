@@ -78,7 +78,7 @@ fun HomeContent() {
             item {
                 OutlinedButton(
                     onClick = {
-                        navigator.goto(CreateOrderScreen)
+                        navigator.goto(CreateOrderScreen())
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
