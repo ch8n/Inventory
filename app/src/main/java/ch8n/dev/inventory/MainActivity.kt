@@ -48,6 +48,7 @@ class MainActivity : ComponentActivity() {
                             userCaseProvider.getSupplier.invalidate()
                             userCaseProvider.getCategory.invalidate()
                             userCaseProvider.getItems.invalidate()
+                            userCaseProvider.getOrders.invalidate()
                         }
 
                         val navigator = LocalNavigator.current

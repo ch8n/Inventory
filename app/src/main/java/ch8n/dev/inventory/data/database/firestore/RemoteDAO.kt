@@ -10,7 +10,9 @@ import ch8n.dev.inventory.data.usecase.ItemOrder
 import ch8n.dev.inventory.data.usecase.toRemote
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.getField
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
 import kotlinx.coroutines.tasks.await
 
 class RemoteSupplierDAO {
@@ -248,8 +250,14 @@ class RemoteOrderDAO(
         return this.getDouble(key) ?: 0.0
     }
 
-    private fun <T> DocumentSnapshot.getList(key: String): List<T> {
-        return this.get(key, List::class.java)?.mapNotNull { it as? T } ?: emptyList()
+    private inline fun <reified T> DocumentSnapshot.getList(key: String): List<T> {
+        return kotlin.runCatching {
+            val gson = Gson()
+            val json = this.get(key)?.toString() ?: ""
+            val list = gson.fromJson(json, List::class.java)
+            list.map { gson.toJson(it) }
+                .map { gson.fromJson(it, T::class.java) }
+        }.getOrNull() ?: emptyList()
     }
 
     suspend fun getAllOrders(): List<OrderFS> {
@@ -274,13 +282,15 @@ class RemoteOrderDAO(
     suspend fun createOrder(order: Order): OrderFS {
         val batch = remoteDB.batch()
         val itemCollection = remoteItemDAO.getItemDocumentCollection()
-        order.itemsIds.forEach { (id, qty) ->
-            val localItem = localItemDAO.findById(id) ?: return@forEach
+        val updatedInventoryItems = order.itemsIds.mapNotNull { (id, qty) ->
+            val localItem = localItemDAO.findById(id) ?: return@mapNotNull null
             val itemRef = itemCollection.document(id)
             val updatedQty = localItem.itemQuantity - qty
             batch.update(itemRef, "itemQuantity", updatedQty)
+            localItem.copy(itemQuantity = updatedQty)
         }
         batch.commit()
+        localItemDAO.insertAll(*updatedInventoryItems.toTypedArray())
         return upsertOrderItem(order)
     }
 
