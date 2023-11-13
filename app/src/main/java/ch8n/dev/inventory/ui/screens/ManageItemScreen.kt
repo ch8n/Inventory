@@ -531,27 +531,22 @@ fun ManageItemContent(
 
                     OutlinedButton(
                         onClick = {
-                            val isValid = with(selectedItem) {
-                                itemName.isNotEmpty()
-                                        && itemImage.isNotEmpty()
-                                        && itemCategoryId.isNotEmpty()
-                                        && this.itemSupplierId.isNotEmpty()
-                                        && itemColor.isNotEmpty()
-                                        && this.itemWeight > 0.0
-                                        && this.itemSize.isNotEmpty()
-                                        && this.itemPurchasePrice > 0
-                                        && this.itemSellingPrice > 0
+                            with(selectedItem) {
+                                if (itemName.isEmpty()) return@OutlinedButton context.toast("name empty!")
+                                if (itemImage.isEmpty()) return@OutlinedButton context.toast("image empty!")
+                                if (itemCategoryId.isEmpty()) return@OutlinedButton context.toast("category empty!")
+                                if (itemSupplierId.isEmpty()) return@OutlinedButton context.toast("supplier empty!")
+                                if (itemColor.isEmpty()) return@OutlinedButton context.toast("item color empty!")
+                                if (itemWeight >= 0.0) return@OutlinedButton context.toast("item weight invalid!")
+                                if (itemSize.isEmpty()) return@OutlinedButton context.toast("item size empty!")
+                                if (itemSize.isEmpty()) return@OutlinedButton context.toast("item size empty!")
+                                if (itemPurchasePrice >= 0) return@OutlinedButton context.toast("item purchase invalid!")
+                                if (itemSellingPrice >= 0) return@OutlinedButton context.toast("item selling invalid!")
                             }
-                            if (isValid) {
-                                Log.d("ch8n", "adding item $selectedItem")
-                                userCaseProvider.upsertItem.uploadImageAndUpdateRemote(selectedItem)
-                                Toast.makeText(
-                                    context,
-                                    "Create item ${selectedItem.itemName}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                navigator.back()
-                            }
+                            Log.d("ch8n", "adding item $selectedItem")
+                            userCaseProvider.upsertItem.uploadImageAndUpdateRemote(selectedItem)
+                            context.toast("Create item ${selectedItem.itemName}")
+                            navigator.back()
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {

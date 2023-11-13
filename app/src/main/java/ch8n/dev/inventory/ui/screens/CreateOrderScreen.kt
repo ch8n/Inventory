@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import ch8n.dev.inventory.ImagePreviewScreen
 import ch8n.dev.inventory.data.domain.InventoryCategory
@@ -44,6 +45,7 @@ import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.data.usecase.ItemOrder
 import ch8n.dev.inventory.sdp
 import ch8n.dev.inventory.ssp
+import ch8n.dev.inventory.toast
 import ch8n.dev.inventory.ui.LocalNavigator
 import ch8n.dev.inventory.ui.LocalUseCaseProvider
 import coil.compose.AsyncImage
@@ -76,9 +78,9 @@ fun CreateOrderContent(
     val scope = rememberCoroutineScope()
     val userCaseProvider = LocalUseCaseProvider.current
     val navigator = LocalNavigator.current
-
     val items by userCaseProvider.getItems.filter(searchQuery, selectedCategory, selectedSupplier)
         .collectAsState(initial = emptyList())
+    val context = LocalContext.current
 
     BottomSheet(
         sheetContent = { bottomSheet ->
@@ -368,9 +370,11 @@ fun CreateOrderContent(
                 item {
                     OutlinedButton(
                         onClick = {
-                            if (clientName.isEmpty()) return@OutlinedButton
-                            if (clientContact.isEmpty()) return@OutlinedButton
-                            if (shortlistedItem.isEmpty()) return@OutlinedButton
+                            if (clientName.isEmpty()) return@OutlinedButton context.toast("Empty Name!")
+                            if (clientContact.isEmpty() && clientContact.length != 10) return@OutlinedButton context.toast("10 digit Contact!")
+                            val orders = shortlistedItem.entries.filter { it.value > 0 }
+                            if (orders.isEmpty()) return@OutlinedButton context.toast("Cart is Empty!")
+
                             userCaseProvider.createOrder.execute(
                                 Order(
                                     clientName = clientName,
