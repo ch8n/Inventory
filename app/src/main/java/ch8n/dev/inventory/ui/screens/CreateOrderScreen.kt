@@ -368,6 +368,9 @@ fun CreateOrderContent(
                 item {
                     OutlinedButton(
                         onClick = {
+                            if (clientName.isEmpty()) return@OutlinedButton
+                            if (clientContact.isEmpty()) return@OutlinedButton
+                            if (shortlistedItem.isEmpty()) return@OutlinedButton
                             userCaseProvider.createOrder.execute(
                                 Order(
                                     clientName = clientName,
