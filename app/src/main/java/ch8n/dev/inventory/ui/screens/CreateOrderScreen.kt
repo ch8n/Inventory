@@ -376,7 +376,7 @@ fun CreateOrderContent(
                             if (orders.isEmpty()) return@OutlinedButton context.toast("Cart is Empty!")
 
                             userCaseProvider.createOrder.execute(
-                                Order(
+                                Order.Empty.copy(
                                     clientName = clientName,
                                     contact = clientContact,
                                     comment = orderComment,

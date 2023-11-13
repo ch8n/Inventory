@@ -2,7 +2,6 @@ package ch8n.dev.inventory.data.domain
 
 import androidx.compose.runtime.Stable
 import ch8n.dev.inventory.data.usecase.ItemOrder
-import java.util.UUID
 
 
 @Stable
@@ -85,7 +84,7 @@ enum class OrderStatus {
 }
 
 data class Order(
-    val uid: String = UUID.randomUUID().toString(),
+    val uid: String,
     val clientName: String,
     val contact: String,
     val comment: String,
@@ -94,4 +93,18 @@ data class Order(
     val itemsIds: List<ItemOrder>,
     val orderStatus: OrderStatus,
     val createdAt: Long
-)
+) {
+    companion object {
+        val Empty = Order(
+            uid = "",
+            clientName = "",
+            contact = "",
+            comment = "",
+            totalPrice = 0,
+            totalWeight = 0.0,
+            itemsIds = listOf(),
+            orderStatus = OrderStatus.ISSUE,
+            createdAt = 0
+        )
+    }
+}
