@@ -1,6 +1,8 @@
 package ch8n.dev.inventory.data.database.firestore
 
 import android.util.Log
+import ch8n.dev.inventory.data.DataModule
+import ch8n.dev.inventory.data.database.roomdb.LocalItemDAO
 import ch8n.dev.inventory.data.domain.InventoryItem
 import ch8n.dev.inventory.data.domain.Order
 import ch8n.dev.inventory.data.domain.OrderStatus
@@ -133,6 +135,8 @@ class RemoteItemDAO {
     private val remoteDB = Firebase.firestore
     private val itemDocumentReference = remoteDB.collection(Schema.INVENTORY_ITEM)
 
+    fun getItemDocumentCollection() = itemDocumentReference
+
     private fun DocumentSnapshot.getStringOrEmpty(key: String): String {
         return this.getString(key) ?: ""
     }
@@ -203,13 +207,30 @@ class RemoteItemDAO {
 }
 
 
-class RemoteOrderDAO {
+class RemoteOrderDAO(
+    private val remoteItemDAO: RemoteItemDAO = DataModule.Injector.remoteDatabase.remoteItemDAO,
+    private val localItemDAO: LocalItemDAO = DataModule.Injector.localDatabase.localItemDAO()
+) {
     object Schema {
         const val ORDERS = "orders"
     }
 
     private val remoteDB = Firebase.firestore
     private val orderDocumentReference = remoteDB.collection(Schema.ORDERS)
+
+    fun Order.toMap(): HashMap<String, Any> {
+        val order = this
+        return hashMapOf(
+            "clientName" to order.clientName,
+            "contact" to order.contact,
+            "comment" to order.comment,
+            "totalPrice" to order.totalPrice,
+            "totalWeight" to order.totalWeight,
+            "itemsIds" to order.itemsIds,
+            "orderStatus" to order.orderStatus,
+            "createdAt" to order.createdAt
+        )
+    }
 
     private fun DocumentSnapshot.getStringOrEmpty(key: String): String {
         return this.getString(key) ?: ""
@@ -249,20 +270,25 @@ class RemoteOrderDAO {
         return orderFS
     }
 
-    suspend fun upsertInventoryItem(
+
+    suspend fun createOrder(order: Order): OrderFS {
+        val batch = remoteDB.batch()
+        val itemCollection = remoteItemDAO.getItemDocumentCollection()
+        order.itemsIds.forEach { (id, qty) ->
+            val localItem = localItemDAO.findById(id) ?: return@forEach
+            val itemRef = itemCollection.document(id)
+            val updatedQty = localItem.itemQuantity - qty
+            batch.update(itemRef, "itemQuantity", updatedQty)
+        }
+        batch.commit()
+        return upsertOrderItem(order)
+    }
+
+    suspend fun upsertOrderItem(
         order: Order
     ): OrderFS {
 
-        val attributes = hashMapOf(
-            "clientName" to order.clientName,
-            "contact" to order.contact,
-            "comment" to order.comment,
-            "totalPrice" to order.totalPrice,
-            "totalWeight" to order.totalWeight,
-            "itemsIds" to order.itemsIds,
-            "orderStatus" to order.orderStatus,
-            "createdAt" to order.createdAt
-        )
+        val attributes = order.toMap()
 
         val _documentReferenceId = orderDocumentReference
             .run {

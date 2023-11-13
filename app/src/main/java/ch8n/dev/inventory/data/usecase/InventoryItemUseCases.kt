@@ -139,7 +139,7 @@ class UpsertInventoryItem(
     private val uploadFileDAO: RemoteUploadDAO = DataModule.Injector.remoteDatabase.remoteUploadDAO,
     private val applicationContext: Context = DataModule.Injector.appContext,
 ) : UseCaseScope {
-    fun execute(
+    fun uploadImageAndUpdateRemote(
         item: InventoryItem
     ) {
         launch(NonCancellable) {
@@ -147,6 +147,15 @@ class UpsertInventoryItem(
             val remoteItem = remoteItemDAO.upsertInventoryItem(item.copy(itemImage = remoteUrl))
             val entity = remoteItem.toEntity()
             localItemDAO.insertAll(entity)
+        }
+    }
+
+    fun updateRemote(
+        item: InventoryItem
+    ) {
+        launch(NonCancellable) {
+            val remoteItem = remoteItemDAO.upsertInventoryItem(item)
+            localItemDAO.insertAll(remoteItem.toEntity())
         }
     }
 }

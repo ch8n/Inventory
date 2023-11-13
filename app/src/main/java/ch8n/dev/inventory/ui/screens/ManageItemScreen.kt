@@ -70,7 +70,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.content.FileProvider
-import androidx.core.net.toFile
 import androidx.core.net.toUri
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventoryItem
@@ -545,7 +544,7 @@ fun ManageItemContent(
                             }
                             if (isValid) {
                                 Log.d("ch8n", "adding item $selectedItem")
-                                userCaseProvider.upsertItem.execute(selectedItem)
+                                userCaseProvider.upsertItem.uploadImageAndUpdateRemote(selectedItem)
                                 Toast.makeText(
                                     context,
                                     "Create item ${selectedItem.itemName}",

@@ -1,13 +1,10 @@
 package ch8n.dev.inventory.data.usecase
 
-import androidx.compose.runtime.currentComposer
 import ch8n.dev.inventory.UseCaseScope
 import ch8n.dev.inventory.data.DataModule
 import ch8n.dev.inventory.data.database.InMemoryDB
 import ch8n.dev.inventory.data.database.firestore.OrderFS
-import ch8n.dev.inventory.data.database.firestore.RemoteItemDAO
 import ch8n.dev.inventory.data.database.firestore.RemoteOrderDAO
-import ch8n.dev.inventory.data.database.roomdb.LocalItemDAO
 import ch8n.dev.inventory.data.database.roomdb.LocalOrderDAO
 import ch8n.dev.inventory.data.database.roomdb.OrderEntity
 import ch8n.dev.inventory.data.domain.Order
@@ -99,12 +96,16 @@ class GetOrders(
 }
 
 class CreateOrder(
-    private val database: InMemoryDB = InMemoryDB,
-) {
+    private val remoteOrderDAO: RemoteOrderDAO = DataModule.Injector.remoteDatabase.remoteOrderDAO,
+    private val localOrderDAO: LocalOrderDAO = DataModule.Injector.localDatabase.localOrderDAO(),
+) : UseCaseScope {
     fun execute(
         order: Order
     ) {
-        database.addNewOrder(order)
+        launch(NonCancellable) {
+            val remoteOrder = remoteOrderDAO.createOrder(order)
+            localOrderDAO.insertAll(remoteOrder.toEntity())
+        }
     }
 }
 
