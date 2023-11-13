@@ -389,6 +389,7 @@ fun CreateOrderContent(
                                     createdAt = System.currentTimeMillis()
                                 )
                             )
+                            context.toast("Creating order!")
                             navigator.back()
                         },
                         modifier = Modifier.fillMaxWidth()
