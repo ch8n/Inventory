@@ -69,11 +69,9 @@ data class InventorySupplier(
 
 
 enum class OrderStatus {
-    NEW_ORDER,
-    PACKING,
+    NEW,
     PACKED,
     DISPATCHED,
-    DELIVERED,
     ISSUE;
 
     companion object {

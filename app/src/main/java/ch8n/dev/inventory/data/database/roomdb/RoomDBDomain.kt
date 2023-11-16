@@ -1,5 +1,6 @@
 package ch8n.dev.inventory.data.database.roomdb
 
+import android.util.Log
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -8,7 +9,8 @@ import androidx.room.TypeConverters
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.data.usecase.ItemOrder
 import com.google.gson.Gson
-import java.util.UUID
+import com.google.gson.reflect.TypeToken
+import java.lang.reflect.Type
 
 
 @Entity
@@ -29,22 +31,22 @@ class StringListConverter {
     }
 }
 
-abstract class GsonListConverter<T> {
+object ItemOrderListConverter {
 
     private val gson = Gson()
 
     @TypeConverter
-    fun fromString(json: String): List<T> {
-        return gson.fromJson(json, List::class.java).map { it as T }
+    fun toJson(value: List<ItemOrder>): String {
+        return gson.toJson(value)
     }
 
     @TypeConverter
-    fun toString(value: List<ItemOrder>): String {
-        return gson.toJson(value)
+    fun fromJson(json: String): List<ItemOrder> {
+        return gson.fromJson(json, List::class.java).map {
+            gson.toJson(it).let { gson.fromJson(it, ItemOrder::class.java) }
+        }
     }
 }
-
-class ItemOrderListConverter : GsonListConverter<ItemOrder>()
 
 
 @Entity
@@ -65,7 +67,6 @@ data class InventoryItemEntity(
     @ColumnInfo(name = "item_supplier_id") val itemSupplierId: String,
     @ColumnInfo(name = "item_size") val itemSize: String,
     @ColumnInfo(name = "item_color") val itemColor: String,
-
     @ColumnInfo(name = "item_quantity") val itemQuantity: Int,
     @ColumnInfo(name = "item_selling_price") val itemSellingPrice: Int,
     @ColumnInfo(name = "item_purchase_price") val itemPurchasePrice: Int,

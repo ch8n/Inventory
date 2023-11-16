@@ -120,11 +120,8 @@ class GetInventoryItem(
                     if (selectedCategory.id.isEmpty()) return@filter true
                     return@filter it.itemCategoryId == selectedCategory.id
                 }.filter {
-                    if (searchQuery.isNotEmpty()) {
-                        return@filter it.itemName.contains(searchQuery, ignoreCase = true)
-                    } else {
-                        true
-                    }
+                    if (searchQuery.isEmpty()) return@filter true
+                    return@filter it.itemName.contains(searchQuery, ignoreCase = true)
                 }
             Log.d("ch8n", "GetInventoryItem filter: $result")
             result

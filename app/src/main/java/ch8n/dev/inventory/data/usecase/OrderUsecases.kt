@@ -2,7 +2,6 @@ package ch8n.dev.inventory.data.usecase
 
 import ch8n.dev.inventory.UseCaseScope
 import ch8n.dev.inventory.data.DataModule
-import ch8n.dev.inventory.data.database.InMemoryDB
 import ch8n.dev.inventory.data.database.firestore.OrderFS
 import ch8n.dev.inventory.data.database.firestore.RemoteOrderDAO
 import ch8n.dev.inventory.data.database.roomdb.LocalOrderDAO
@@ -110,28 +109,20 @@ class CreateOrder(
 }
 
 class UpdateOrder(
-    private val database: InMemoryDB = InMemoryDB,
-) {
+    private val remoteOrderDAO: RemoteOrderDAO = DataModule.Injector.remoteDatabase.remoteOrderDAO,
+    private val localOrderDAO: LocalOrderDAO = DataModule.Injector.localDatabase.localOrderDAO(),
+) : UseCaseScope {
     fun execute(
-        currentOrder: Order,
-        clientName: String = currentOrder.clientName,
-        contact: String = currentOrder.contact,
-        comment: String = currentOrder.comment,
-        totalPrice: Int = currentOrder.totalPrice,
-        totalWeight: Double = currentOrder.totalWeight,
-        itemsIds: List<ItemOrder> = currentOrder.itemsIds,
-        orderStatus: OrderStatus = currentOrder.orderStatus,
+        originalOrder: Order,
+        updatedOrder: Order,
     ) {
-        val order = currentOrder.copy(
-            clientName = clientName,
-            comment = comment,
-            totalPrice = totalPrice,
-            totalWeight = totalWeight,
-            itemsIds = itemsIds,
-            contact = contact,
-            orderStatus = orderStatus
-        )
-        database.updateNewOrder(order)
+        launch(NonCancellable) {
+            val remoteOrder = remoteOrderDAO.updateOrder(
+                original = originalOrder,
+                updated = updatedOrder
+            )
+            localOrderDAO.insertAll(remoteOrder.toEntity())
+        }
     }
 }
 

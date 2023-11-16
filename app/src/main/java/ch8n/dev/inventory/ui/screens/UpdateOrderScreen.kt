@@ -27,6 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -54,7 +55,8 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun CreateOrderContent(
+fun UpdateOrderContent(
+    originalOrder: Order,
     shortlistedItem: Map<String, Int>,
     updateShortListedItem: (updated: Map<String, Int>) -> Unit,
     selectedOrderStatus: OrderStatus,
@@ -78,8 +80,10 @@ fun CreateOrderContent(
     val scope = rememberCoroutineScope()
     val userCaseProvider = LocalUseCaseProvider.current
     val navigator = LocalNavigator.current
-    val items by userCaseProvider.getItems.filter(searchQuery, selectedCategory, selectedSupplier)
+    val items by userCaseProvider.getItems
+        .filter(searchQuery, selectedCategory, selectedSupplier)
         .collectAsState(initial = emptyList())
+
     val context = LocalContext.current
 
     BottomSheet(
@@ -375,8 +379,9 @@ fun CreateOrderContent(
                             val orders = shortlistedItem.entries.filter { it.value > 0 }
                             if (orders.isEmpty()) return@OutlinedButton context.toast("Cart is Empty!")
 
-                            userCaseProvider.createOrder.execute(
-                                Order.Empty.copy(
+                            userCaseProvider.updateOrder.execute(
+                                originalOrder = originalOrder,
+                                updatedOrder = originalOrder.copy(
                                     clientName = clientName,
                                     contact = clientContact,
                                     comment = orderComment,
@@ -386,15 +391,15 @@ fun CreateOrderContent(
                                         ItemOrder(key, value)
                                     },
                                     orderStatus = selectedOrderStatus,
-                                    createdAt = System.currentTimeMillis()
+                                    createdAt = originalOrder.createdAt
                                 )
                             )
-                            context.toast("Creating order!")
+                            context.toast("Updating order!")
                             navigator.back()
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(text = "+ Create Order")
+                        Text(text = "+ Update Order")
                     }
                 }
 
@@ -404,25 +409,3 @@ fun CreateOrderContent(
 }
 
 
-@Composable
-fun RowSummaryText(
-    key: String,
-    value: String
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = key,
-            color = Color.DarkGray,
-            fontSize = 16.ssp
-        )
-        Text(
-            text = value,
-            color = Color.DarkGray,
-            fontSize = 16.ssp
-        )
-    }
-}

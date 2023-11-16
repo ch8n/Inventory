@@ -17,8 +17,8 @@ import ch8n.dev.inventory.data.domain.Order
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.ui.LocalNavigator
 import ch8n.dev.inventory.ui.LocalUseCaseProvider
-import ch8n.dev.inventory.ui.WithUseCaseProvider
 import ch8n.dev.inventory.ui.WithNavigator
+import ch8n.dev.inventory.ui.WithUseCaseProvider
 import ch8n.dev.inventory.ui.screens.CreateOrderContent
 import ch8n.dev.inventory.ui.screens.HomeContent
 import ch8n.dev.inventory.ui.screens.ImagePreviewContent
@@ -146,7 +146,7 @@ class ManageItemScreen : Screen() {
 
 class CreateOrderScreen() : Screen() {
 
-    private val selectedOrderStatus = MutableStateFlow(OrderStatus.NEW_ORDER)
+    private val selectedOrderStatus = MutableStateFlow(OrderStatus.NEW)
     private val searchQuery = MutableStateFlow("")
     private val selectedCategory = MutableStateFlow(InventoryCategory.Empty)
     private val selectedSupplier = MutableStateFlow(InventorySupplier.Empty)
@@ -212,19 +212,83 @@ class CreateOrderScreen() : Screen() {
 
 }
 
+
+class UpdateOrderScreen(private val order: Order) : Screen() {
+
+    private val orderItems = order.itemsIds.associate { it.itemId to it.orderQty }
+    private val selectedOrderStatus = MutableStateFlow(order.orderStatus)
+    private val searchQuery = MutableStateFlow("")
+    private val selectedCategory = MutableStateFlow(InventoryCategory.Empty)
+    private val selectedSupplier = MutableStateFlow(InventorySupplier.Empty)
+    private val scrollPosition = MutableStateFlow(0)
+    private val clientName = MutableStateFlow(order.clientName)
+    private val clientContact = MutableStateFlow(order.contact)
+    private val orderComment = MutableStateFlow(order.comment)
+    private val shortlistedItem = MutableStateFlow<Map<String, Int>>(orderItems)
+
+    @Composable
+    override fun Content() {
+
+        val selectedOrderStatus by selectedOrderStatus.collectAsState()
+        val shortlistedItem by shortlistedItem.collectAsState()
+
+        val searchQuery by searchQuery.collectAsState()
+        val selectedCategory by selectedCategory.collectAsState()
+        val selectedSupplier by selectedSupplier.collectAsState()
+        val scrollPosition by scrollPosition.collectAsState()
+        val clientName by clientName.collectAsState()
+        val clientContact by clientContact.collectAsState()
+        val orderComment by orderComment.collectAsState()
+
+        UpdateOrderContent(
+            originalOrder = order,
+            shortlistedItem = shortlistedItem,
+            updateShortListedItem = {
+                this.shortlistedItem.tryEmit(it)
+            },
+            selectedOrderStatus = selectedOrderStatus,
+            onUpdateOrderStatus = {
+                this.selectedOrderStatus.tryEmit(it)
+            },
+            clientName = clientName,
+            updateClientName = {
+                this.clientName.tryEmit(it)
+            },
+            clientContact = clientContact,
+            updateClientContact = {
+                this.clientContact.tryEmit(it)
+            },
+            orderComment = orderComment,
+            updateOrderComment = {
+                this.orderComment.tryEmit(it)
+            },
+            searchQuery = searchQuery,
+            updateSearchQuery = {
+                this.searchQuery.tryEmit(it)
+            },
+            selectedCategory = selectedCategory,
+            selectedSupplier = selectedSupplier,
+            updateSelectedCategory = {
+                this.selectedCategory.tryEmit(it)
+            },
+            updateSelectedSupplier = {
+                this.selectedSupplier.tryEmit(it)
+            },
+            initialScrollPosition = scrollPosition,
+            onScrollPositionChanged = {
+                this.scrollPosition.tryEmit(it)
+            },
+        )
+    }
+
+}
+
 object ManageOrdersScreen : Screen() {
     @Composable
     override fun Content() {
         ManageOrderContent()
     }
 
-}
-
-data class UpdateOrderScreen(val order: Order) : Screen() {
-    @Composable
-    override fun Content() {
-        UpdateOrderContent(order)
-    }
 }
 
 data class ImagePreviewScreen(val uri: Uri) : Screen() {

@@ -1,5 +1,6 @@
 package ch8n.dev.inventory.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
@@ -35,7 +36,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.style.TextOverflow
+import ch8n.dev.inventory.CreateOrderScreen
+import ch8n.dev.inventory.UpdateOrderScreen
 import ch8n.dev.inventory.data.domain.OrderStatus
 import ch8n.dev.inventory.rememberMutableState
 import ch8n.dev.inventory.sdp
@@ -43,6 +47,7 @@ import ch8n.dev.inventory.ssp
 import ch8n.dev.inventory.ui.LocalUseCaseProvider
 import ch8n.dev.inventory.ui.LocalNavigator
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -67,7 +72,7 @@ fun ManageOrderContent() {
             onValueChange = {
                 searchQuery = it
             },
-            label = { Text(text = "Search by Contact or Email") },
+            label = { Text(text = "Search by Contact or Name") },
             modifier = Modifier
                 .padding(16.sdp)
                 .fillMaxWidth(),
@@ -103,7 +108,7 @@ fun ManageOrderContent() {
 
                 item {
                     Text(
-                        text = "${orderStatus.name} Tab",
+                        text = "${orderStatus.name} ORDERS",
                         fontSize = 32.ssp,
                         color = Color.DarkGray
                     )
@@ -121,10 +126,8 @@ fun ManageOrderContent() {
                             .border(2.sdp, Color.DarkGray)
                             .padding(8.sdp)
                             .clickable {
-                                Toast
-                                    .makeText(context, "TODO", Toast.LENGTH_SHORT)
-                                    .show()
-                                //navigator.goto(ManageOrdersScreen)
+                                Log.d("ch8n", "ch8n ---> ${order.itemsIds}")
+                                navigator.goto(UpdateOrderScreen(order))
                             }
                     ) {
                         Text(text = order.clientName)

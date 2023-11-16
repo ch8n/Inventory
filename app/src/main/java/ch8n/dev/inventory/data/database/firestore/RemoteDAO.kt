@@ -10,7 +10,6 @@ import ch8n.dev.inventory.data.usecase.ItemOrder
 import ch8n.dev.inventory.data.usecase.toRemote
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.getField
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import kotlinx.coroutines.tasks.await
@@ -292,6 +291,42 @@ class RemoteOrderDAO(
         batch.commit()
         localItemDAO.insertAll(*updatedInventoryItems.toTypedArray())
         return upsertOrderItem(order)
+    }
+
+    suspend fun updateOrder(
+        original: Order,
+        updated: Order,
+    ): OrderFS {
+        val originalCart = original.itemsIds.associate { it.itemId to it.orderQty }
+        val updatedCart = updated.itemsIds.associate { it.itemId to it.orderQty }
+        val batch = remoteDB.batch()
+        val itemCollection = remoteItemDAO.getItemDocumentCollection()
+        originalCart.forEach { (id, qty) ->
+            val updatedQty = updatedCart.get(id) ?: 0
+            val localItem = localItemDAO.findById(id) ?: return@forEach
+            val itemRef = itemCollection.document(id)
+            when {
+                updatedQty > qty -> {
+                    val change = updatedQty - qty
+                    val newQty = localItem.itemQuantity - change
+                    batch.update(itemRef, "itemQuantity", newQty)
+                    localItemDAO.insertAll(localItem.copy(itemQuantity = newQty))
+                }
+
+                updatedQty < qty -> {
+                    val change = qty - updatedQty
+                    val newQty = localItem.itemQuantity + change
+                    batch.update(itemRef, "itemQuantity", newQty)
+                    localItemDAO.insertAll(localItem.copy(itemQuantity = newQty))
+                }
+
+                else -> {
+                    /**Do nothing**/
+                }
+            }
+        }
+        batch.commit()
+        return upsertOrderItem(updated)
     }
 
     suspend fun upsertOrderItem(

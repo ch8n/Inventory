@@ -14,6 +14,7 @@ import ch8n.dev.inventory.data.usecase.GetInventoryCategory
 import ch8n.dev.inventory.data.usecase.GetInventoryItem
 import ch8n.dev.inventory.data.usecase.GetInventorySupplier
 import ch8n.dev.inventory.data.usecase.GetOrders
+import ch8n.dev.inventory.data.usecase.UpdateOrder
 import ch8n.dev.inventory.data.usecase.UpsertInventoryItem
 
 val LocalUseCaseProvider = compositionLocalOf<UserCaseProvider> { error("AppStore not created!") }
@@ -38,6 +39,6 @@ class UserCaseProvider(
     val createSuppliers: CreateInventorySuppliers = CreateInventorySuppliers(),
     val upsertItem: UpsertInventoryItem = UpsertInventoryItem(),
     val createOrder: CreateOrder = CreateOrder(),
-    val updateOrder: CreateOrder = CreateOrder(),
+    val updateOrder: UpdateOrder = UpdateOrder(),
     val deleteItem: DeleteInventoryItem = DeleteInventoryItem(),
 )
