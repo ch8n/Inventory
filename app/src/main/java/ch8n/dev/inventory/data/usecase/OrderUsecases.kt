@@ -115,6 +115,7 @@ class UpdateOrder(
     fun execute(
         originalOrder: Order,
         updatedOrder: Order,
+        onComplete: () -> Unit,
     ) {
         launch(NonCancellable) {
             val remoteOrder = remoteOrderDAO.updateOrder(
@@ -122,6 +123,7 @@ class UpdateOrder(
                 updated = updatedOrder
             )
             localOrderDAO.insertAll(remoteOrder.toEntity())
+            onComplete.invoke()
         }
     }
 }

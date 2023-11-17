@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
+import ch8n.dev.inventory.HomeScreen
 import ch8n.dev.inventory.ImagePreviewScreen
 import ch8n.dev.inventory.data.domain.InventoryCategory
 import ch8n.dev.inventory.data.domain.InventorySupplier
@@ -392,10 +393,12 @@ fun UpdateOrderContent(
                                     },
                                     orderStatus = selectedOrderStatus,
                                     createdAt = originalOrder.createdAt
-                                )
+                                ),
+                                onComplete = {
+                                    context.toast("Updating order!")
+                                    navigator.back(steps = 2)
+                                }
                             )
-                            context.toast("Updating order!")
-                            navigator.back()
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {

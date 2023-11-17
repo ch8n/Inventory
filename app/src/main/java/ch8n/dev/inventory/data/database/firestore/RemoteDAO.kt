@@ -299,33 +299,33 @@ class RemoteOrderDAO(
     ): OrderFS {
         val originalCart = original.itemsIds.associate { it.itemId to it.orderQty }
         val updatedCart = updated.itemsIds.associate { it.itemId to it.orderQty }
+        val finalItemIds = originalCart + updatedCart
         val batch = remoteDB.batch()
         val itemCollection = remoteItemDAO.getItemDocumentCollection()
-        originalCart.forEach { (id, qty) ->
-            val updatedQty = updatedCart.get(id) ?: 0
-            val localItem = localItemDAO.findById(id) ?: return@forEach
+
+        val updatedItems = finalItemIds.mapNotNull { (id, qty) ->
+            val localItem = localItemDAO.findById(id) ?: return@mapNotNull null
             val itemRef = itemCollection.document(id)
-            when {
-                updatedQty > qty -> {
-                    val change = updatedQty - qty
-                    val newQty = localItem.itemQuantity - change
-                    batch.update(itemRef, "itemQuantity", newQty)
-                    localItemDAO.insertAll(localItem.copy(itemQuantity = newQty))
+            val prevQty = originalCart.get(id) ?: 0
+            val updateQty = updatedCart.get(id) ?: 0
+            return@mapNotNull when {
+                updateQty > prevQty -> {
+                    val change = updateQty - prevQty
+                    val finalQty = localItem.itemQuantity - change
+                    batch.update(itemRef, "itemQuantity", finalQty)
+                    localItem.copy(itemQuantity = finalQty)
                 }
-
-                updatedQty < qty -> {
-                    val change = qty - updatedQty
-                    val newQty = localItem.itemQuantity + change
-                    batch.update(itemRef, "itemQuantity", newQty)
-                    localItemDAO.insertAll(localItem.copy(itemQuantity = newQty))
+                updateQty < prevQty -> {
+                    val change = prevQty - updateQty
+                    val finalQty = localItem.itemQuantity + change
+                    batch.update(itemRef, "itemQuantity", finalQty)
+                    localItem.copy(itemQuantity = finalQty)
                 }
-
-                else -> {
-                    /**Do nothing**/
-                }
+                else -> null
             }
         }
         batch.commit()
+        localItemDAO.insertAll(*updatedItems.toTypedArray())
         return upsertOrderItem(updated)
     }
 
@@ -334,7 +334,6 @@ class RemoteOrderDAO(
     ): OrderFS {
 
         val attributes = order.toMap()
-
         val _documentReferenceId = orderDocumentReference
             .run {
                 if (order.uid.isNotEmpty()) {
@@ -345,7 +344,6 @@ class RemoteOrderDAO(
                     documentReference.id
                 }
             }
-
         return order.toRemote().copy(documentReferenceId = _documentReferenceId)
     }
 

@@ -42,8 +42,8 @@ class Navigator {
         _backStack.update { current -> current + destination }
     }
 
-    fun back() {
-        _backStack.update { current -> current.dropLast(1) }
+    fun back(steps:Int = 1) {
+        _backStack.update { current -> current.dropLast(steps) }
     }
 
     fun backTill(destination: Screen) {
