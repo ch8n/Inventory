@@ -8,11 +8,13 @@ import ch8n.dev.inventory.data.database.roomdb.LocalOrderDAO
 import ch8n.dev.inventory.data.database.roomdb.OrderEntity
 import ch8n.dev.inventory.data.domain.Order
 import ch8n.dev.inventory.data.domain.OrderStatus
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 data class ItemOrder(
@@ -123,7 +125,9 @@ class UpdateOrder(
                 updated = updatedOrder
             )
             localOrderDAO.insertAll(remoteOrder.toEntity())
-            onComplete.invoke()
+            withContext(Dispatchers.Main){
+                onComplete.invoke()
+            }
         }
     }
 }
