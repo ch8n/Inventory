@@ -63,4 +63,16 @@ class RemoteUploadDAO {
             ""
         }
     }
+
+    suspend fun deleteImageUrl(url:String) {
+        Log.d(TAG, "getImageUrl: imageUrl=$url")
+        url.ifEmpty { return }
+        try {
+            val imageStorageRef = storage.getReferenceFromUrl(url)
+            imageStorageRef.delete().await()
+            Log.d(TAG, "deleted imageUrl=$url")
+        } catch (e:Exception){
+            Log.d(TAG, "faild to delete imageUrl=$url")
+        }
+    }
 }

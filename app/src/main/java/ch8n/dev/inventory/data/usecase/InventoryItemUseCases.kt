@@ -160,12 +160,14 @@ class UpsertInventoryItem(
 class DeleteInventoryItem(
     private val remoteItemDAO: RemoteItemDAO = DataModule.Injector.remoteDatabase.remoteItemDAO,
     private val localItemDAO: LocalItemDAO = DataModule.Injector.localDatabase.localItemDAO(),
+    private val remoteUploadDAO: RemoteUploadDAO = DataModule.Injector.remoteDatabase.remoteUploadDAO,
 ) : UseCaseScope {
     fun execute(
         itemId: InventoryItem,
     ) {
         launch(NonCancellable) {
             remoteItemDAO.deleteInventoryItem(itemId.uid)
+            remoteUploadDAO.deleteImageUrl(itemId.itemImage)
             localItemDAO.delete(itemId.toEntity())
         }
     }
