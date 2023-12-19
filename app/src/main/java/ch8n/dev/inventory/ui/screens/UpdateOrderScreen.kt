@@ -101,6 +101,9 @@ fun UpdateOrderContent(
                 onDelete = { item ->
                     // nothing will happen
                 },
+                onCopy = {item ->
+                    // nothing will happen
+                },
                 searchQuery = searchQuery,
                 updateSearchQuery = updateSearchQuery,
                 selectedCategory = selectedCategory,

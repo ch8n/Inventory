@@ -96,6 +96,9 @@ fun CreateOrderContent(
                 onDelete = { item ->
                     // nothing will happen
                 },
+                onCopy = {
+                    // nothing will happen
+                },
                 searchQuery = searchQuery,
                 updateSearchQuery = updateSearchQuery,
                 selectedCategory = selectedCategory,

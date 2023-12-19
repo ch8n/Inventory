@@ -563,6 +563,17 @@ fun ManageItemContent(
                     ) {
                         Text(text = "+ Select Existing Item")
                     }
+
+                    OutlinedButton(
+                        onClick = {
+                            scope.launch {
+                                bottomSheetState.show()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = "+ Copy From")
+                    }
                 }
 
 
@@ -584,6 +595,23 @@ fun ManageItemContent(
                 },
                 onDelete = { item ->
                     userCaseProvider.deleteItem.execute(item)
+                    scope.launch {
+                        bottomSheetState.hide()
+                    }
+                },
+                onCopy = { item ->
+                    onUpdateSelectedItem.invoke(
+                        item.copy(
+                            uid = "",
+                            itemName = item.itemName + " copy"
+                        )
+                    )
+                    weight = item.itemWeight.toString()
+                    purchasePrice = item.itemPurchasePrice.toString()
+                    sellingPrice = item.itemSellingPrice.toString()
+                    itemQuantity = item.itemQuantity.toString()
+                    Log.d("ch8n", "copied item $item")
+                    Log.d("ch8n", "copied item $selectedItem")
                     scope.launch {
                         bottomSheetState.hide()
                     }
@@ -729,6 +757,7 @@ fun SearchItemBottomSheetContent(
     onScrollPositionChanged: (position: Int) -> Unit,
     onSelect: (item: InventoryItem) -> Unit,
     onDelete: (item: InventoryItem) -> Unit,
+    onCopy: (item: InventoryItem) -> Unit,
 ) {
 
     val navigator = LocalNavigator.current
@@ -937,6 +966,17 @@ fun SearchItemBottomSheetContent(
                         ) {
                             Text(
                                 text = "Select Item",
+                                fontSize = 14.ssp
+                            )
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                onCopy.invoke(item)
+                            },
+                        ) {
+                            Text(
+                                text = "Copy Item",
                                 fontSize = 14.ssp
                             )
                         }
